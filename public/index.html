@@ -795,16 +795,27 @@ async function submitText(){
   hist.push({role:'user', content:`Guest details: ${listTxt}. Dates: ${reservationDates.checkin} to ${reservationDates.checkout}`});
 
   addBot(lang==='es'
-    ?`¡Perfecto, muchas gracias! 🙏 Recibí los datos de ${guests.length} integrante${guests.length>1?'s':''}.<br><br>Le aviso a Pilar para que genere el código de acceso. Te lo va a enviar por Airbnb en breve 😊<br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
-    :`Thank you! 🙏 I received the details for ${guests.length} guest${guests.length>1?'s':''}.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>📌 <strong>Resort fees charged at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`);
+    ?`¡Perfecto, muchas gracias! 🙏 Recibí los datos de ${guests.length} integrante${guests.length>1?'s':''}.<br><br>Le aviso a Pilar para que genere el código de acceso. Te lo va a enviar por Airbnb en breve 😊<br><br>🗓 <strong>Tu reserva:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} a partir de las <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} hasta las <strong>11:00 AM</strong><br><br>🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código: <strong>0926</strong><br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
+    :`Thank you! 🙏 I received the details for ${guests.length} guest${guests.length>1?'s':''}.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>🗓 <strong>Your reservation:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} from <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} by <strong>11:00 AM</strong><br><br>🔑 Lockbox is to the <strong>left of the main door</strong> · Code: <strong>0926</strong><br><br>📌 <strong>Resort fees at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`);
 
-  await notifyByEmail(
-    `🛂 Guest ID details received — Dársena 9`,
-    `Guest details:\n${listTxt}\n\nCheck-in: ${fmt(reservationDates.checkin)}\nCheck-out: ${fmt(reservationDates.checkout)}\n\nPlease generate the resort access code and send via Airbnb.`
-  );
+  // Send to Google Script
+  try {
+    await fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        type: 'guests',
+        guestName: guestName || guests[0]?.split('—')[0]?.trim() || 'Guest',
+        guests: listTxt,
+        checkin: fmt(reservationDates.checkin),
+        checkout: fmt(reservationDates.checkout),
+        photos: [],
+        folderId: FOLDER_ID
+      })
+    });
+  } catch(e){ console.error('Notification error:', e); }
 
-  const waMsg=`🛂 *Townhouse Marina · Dársena 9*\n\n📅 Check-in: ${fmt(reservationDates.checkin)}\n📅 Check-out: ${fmt(reservationDates.checkout)}\n\n📋 Guests:\n${listTxt}\n\nPlease generate resort access code and send via Airbnb. ✅`;
-  addWACard(waMsg,`<strong>${lang==='es'?'✅ Pilar fue notificada':'✅ Pilar was notified'}</strong>${lang==='es'?'Te responderá por Airbnb. También podés escribirle:':'She\'ll reply via Airbnb. You can also reach her:'}`);
+  addWACard('', `<strong>${lang==='es'?'✅ Pilar fue notificada':'✅ Pilar was notified'}</strong>${lang==='es'?'<br>Te responderá por Airbnb en breve.':'<br>She\'ll reply via Airbnb shortly.'}`);
   hist.push({role:'assistant', content:'Guest details sent to Pilar.'});
 }
 

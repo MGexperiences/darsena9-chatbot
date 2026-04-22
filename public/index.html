@@ -295,7 +295,7 @@ document.getElementById('welcome-msg').innerHTML =
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
   <div style="display:flex;gap:10px;margin-top:12px;">
     <button onclick="setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
-    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇦🇷 Español</button>
+    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
   </div>`;
 
 hist.push({role:'assistant', content:'Greeted guest and showed language selector.'});
@@ -353,7 +353,7 @@ document.getElementById('welcome-msg').innerHTML =
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
   <div style="display:flex;gap:10px;margin-top:12px;">
     <button onclick="setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
-    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇦🇷 Español</button>
+    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
   </div>`;
 
 // ── System prompt ─────────────────────────────────────────────────
@@ -709,8 +709,8 @@ async function submitPhotos(){
   hist.push({role:'user', content:`Guest sent ${n} ID document(s). Dates: ${reservationDates.checkin} to ${reservationDates.checkout}`});
 
   const confirmMsg = lang==='es'
-    ?`¡Perfecto, muchas gracias! 🙏 Recibí ${n>1?'los':'el'} ${n} documento${n>1?'s':''} correctamente.<br><br>Le aviso a Pilar para que genere el código de acceso. Te lo va a enviar por Airbnb en breve 😊<br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
-    :`Thank you so much! 🙏 I received your ${n} ID document${n>1?'s':''} successfully.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>📌 <strong>Resort fees charged at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`;
+    ?`¡Perfecto, muchas gracias! 🙏 Recibí ${n>1?'los':'el'} ${n} documento${n>1?'s':''} correctamente.<br><br>Le aviso a Pilar para que genere el código de acceso al resort. Te lo va a enviar por Airbnb en breve 😊<br><br>🗓 <strong>Tu reserva:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} a partir de las <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} hasta las <strong>11:00 AM</strong><br><br>🔑 <strong>Acceso a la propiedad:</strong><br>• El portallaves está a la <strong>izquierda de la puerta principal</strong><br>• Código: <strong>0926</strong><br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
+    :`Thank you so much! 🙏 I received your ${n} ID document${n>1?'s':''} successfully.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>🗓 <strong>Your reservation:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} from <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} by <strong>11:00 AM</strong><br><br>🔑 <strong>Property access:</strong><br>• The lockbox is to the <strong>left of the main door</strong><br>• Code: <strong>0926</strong><br><br>📌 <strong>Resort fees charged at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`;
   addBot(confirmMsg);
 
   // Upload to Google Drive
@@ -724,6 +724,34 @@ async function submitPhotos(){
 
   const waMsg=`🛂 *Townhouse Marina · Dársena 9*\n\n📅 Check-in: ${fmt(reservationDates.checkin)}\n📅 Check-out: ${fmt(reservationDates.checkout)}\n\n🔒 ${n} ID document${n>1?'s':''} saved to your private Drive.\n\nPlease generate the resort access code and send via Airbnb. ✅`;
   addWACard(waMsg,`<strong>${lang==='es'?'✅ Documentos en tu Drive privado':'✅ Documents in your private Drive'}</strong>${lang==='es'?'Pilar fue notificada. También podés escribirle:':'Pilar was notified. You can also reach her:'}`);
+
+  // Show lockbox and door images
+  setTimeout(()=>{
+    const c=document.getElementById('chat');
+    const imgCard=document.createElement('div');
+    imgCard.className='card gold-border';
+    imgCard.style.maxWidth='95%';
+    imgCard.innerHTML=`
+      <div class="card-title">🔑 ${lang==='es'?'Acceso a la propiedad':'Property access'}</div>
+      <div class="card-sub" style="margin-bottom:10px;">${lang==='es'?'El portallaves está a la izquierda de la puerta principal. Código: <strong>0926</strong>':'The lockbox is to the left of the main door. Code: <strong>0926</strong>'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Portallaves':'Lockbox'}</div>
+          <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400" 
+               style="width:100%;border-radius:10px;object-fit:cover;height:140px;" 
+               onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Puerta principal':'Main door'}</div>
+          <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400" 
+               style="width:100%;border-radius:10px;object-fit:cover;height:140px;"
+               onerror="this.style.display='none'">
+        </div>
+      </div>`;
+    c.appendChild(imgCard);
+    c.scrollTop=c.scrollHeight;
+  }, 800);
+
   hist.push({role:'assistant', content:'Documents saved to Drive. Pilar notified.'});
 }
 

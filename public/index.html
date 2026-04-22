@@ -572,8 +572,13 @@ function sendMsg(){
 
 // ── Access button shortcut ────────────────────────────────────────
 function addAccessBtn(){
+  // Don't show if documents already submitted
+  if(window.docsSubmitted) return;
+  // Remove any existing access buttons first
+  document.querySelectorAll('.access-btn-row').forEach(el=>el.remove());
   const c=document.getElementById('chat');
   const d=document.createElement('div');
+  d.className='access-btn-row';
   d.style.cssText='display:flex;justify-content:flex-start;margin:4px 0;animation:fu .25s ease;';
   d.innerHTML=`<button onclick="startIDFlow()" style="background:var(--navy);color:var(--goldl);border:none;border-radius:12px;padding:10px 16px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;">
     🔑 ${lang==='es'?'Iniciar proceso de acceso →':'Start resort access →'}
@@ -723,6 +728,8 @@ async function submitPhotos(){
   pf.style.width='40%';
 
   document.querySelectorAll('.card').forEach(c=>c.remove());
+  document.querySelectorAll('.access-btn-row').forEach(el=>el.remove());
+  window.docsSubmitted = true;
   addUser(lang==='es'?`🛂 Envié ${n} documento${n>1?'s':''} de identidad`:`🛂 Sent ${n} ID document${n>1?'s':''}`);
   hist.push({role:'user', content:`Guest sent ${n} ID document(s). Dates: ${reservationDates.checkin} to ${reservationDates.checkout}`});
 
@@ -795,6 +802,8 @@ async function submitText(){
   if(incomplete){ alert(lang==='es'?'Completá nombre y número de documento para cada persona.':'Please complete both name and document number for each person.'); return; }
 
   document.querySelectorAll('.card').forEach(c=>c.remove());
+  document.querySelectorAll('.access-btn-row').forEach(el=>el.remove());
+  window.docsSubmitted = true;
   const listTxt=guests.join('\n');
   addUser(lang==='es'?`Datos de integrantes:\n${listTxt}`:`Guest details:\n${listTxt}`);
   hist.push({role:'user', content:`Guest details: ${listTxt}. Dates: ${reservationDates.checkin} to ${reservationDates.checkout}`});

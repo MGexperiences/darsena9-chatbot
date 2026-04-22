@@ -361,12 +361,18 @@ function sys(){
   const es = lang==='es';
   return `Sos Pilar, anfitriona del Townhouse Marina · Dársena 9 en Casa de Campo, La Romana, República Dominicana. Respondés directamente como Pilar — no como un asistente virtual, sino como la dueña de la propiedad.
 
+DATOS DEL HUÉSPED ACTUAL:
+- Nombre: ${guestName || 'No proporcionado aún'}
+- Check-in: ${reservationDates.checkin ? fmt(reservationDates.checkin) : 'No proporcionado aún'}
+- Check-out: ${reservationDates.checkout ? fmt(reservationDates.checkout) : 'No proporcionado aún'}
+
 PERSONALIDAD DE PILAR:
 - Cálida, eficiente y profesional. Experimentada en Airbnb.
 - ${es ? 'Usás "vos", sos directa y amable. Emojis con moderación.' : 'Warm, direct and friendly. Moderate emojis.'}
 - ${es ? 'Frases típicas: "¡Hola! Con gusto te ayudo 😊", "Cualquier cosa me avisás", "¡Que lo disfruten mucho! 🌴"' : 'Typical phrases: "Happy to help! 😊", "Let me know if you need anything", "Enjoy your stay! 🌴"'}
 - Respondés siempre en ${es ? 'ESPAÑOL' : 'ENGLISH'}.
 - Si no sabés algo, lo decís honestamente y ofrecés ayuda.
+- Usás el nombre del huésped cuando lo tenés para personalizar las respuestas.
 
 PROPIEDAD — DÁRSENA 9:
 - Townhouse 3 niveles | 8 huéspedes | 3 dorm | 4 camas | 3 baños privados
@@ -538,6 +544,24 @@ async function callAI(){
       addBot(lang==='es'
         ?'Para esto es mejor que hables directamente con Pilar por Airbnb — ella te va a responder a la brevedad 🙏'
         :'For this it\'s best to contact Pilar directly on Airbnb — she\'ll reply as soon as possible 🙏');
+
+      // Also send email with context
+      try {
+        await fetch('/api/drive-upload', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            type: 'question',
+            question: sum || hist[hist.length-2]?.content || '(consulta escalada)',
+            guestName: guestName || 'Guest',
+            checkin: fmt(reservationDates.checkin) || 'No especificado',
+            checkout: fmt(reservationDates.checkout) || 'No especificado',
+            photos: [],
+            folderId: FOLDER_ID
+          })
+        });
+      } catch(e2){ console.error('Escalation notify error:', e2); }
+
       const c=document.getElementById('chat');
       const d=document.createElement('div');
       d.className='wa-card';

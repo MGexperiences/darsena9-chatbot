@@ -419,7 +419,8 @@ REGLAS IMPORTANTES:
 1. NUNCA inventés el código de acceso al resort.
 2. Pagos adicionales SOLO por Airbnb.
 3. Late check-out: solo yo puedo aprobarlo — no lo prometás.
-4. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
+4. SIEMPRE que el huésped mencione fechas, check-in, llegada, acceso al resort o documentos — respondé MUY brevemente (1 sola oración) y decile que toque el botón 🔑 "Acceso al resort" para iniciar el proceso. NO hagas preguntas adicionales ni pidas más datos — el formulario se encarga de todo.
+5. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
 {"escalate":true,"summary":"descripción breve en máximo 20 palabras"}`;}
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -542,6 +543,11 @@ async function callAI(){
     } else {
       addBot(raw);
       hist.push({role:'assistant', content:raw});
+      // If response mentions access code or documents, show shortcut button
+      const accessKeywords = ['código de acceso','code','documentos','documents','pasaporte','passport','identidad','identity','acceso al resort','resort access'];
+      if(accessKeywords.some(k => raw.toLowerCase().includes(k))){
+        addAccessBtn();
+      }
     }
   } catch(e){
     rmTyping();
@@ -562,6 +568,18 @@ function sendMsg(){
   addUser(text);
   hist.push({role:'user', content:text});
   callAI();
+}
+
+// ── Access button shortcut ────────────────────────────────────────
+function addAccessBtn(){
+  const c=document.getElementById('chat');
+  const d=document.createElement('div');
+  d.style.cssText='display:flex;justify-content:flex-start;margin:4px 0;animation:fu .25s ease;';
+  d.innerHTML=`<button onclick="startIDFlow()" style="background:var(--navy);color:var(--goldl);border:none;border-radius:12px;padding:10px 16px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;">
+    🔑 ${lang==='es'?'Iniciar proceso de acceso →':'Start resort access →'}
+  </button>`;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
 }
 
 // ── ACCESS FLOW ───────────────────────────────────────────────────

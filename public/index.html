@@ -936,16 +936,26 @@ async function submitOtherForm(){
   addUser(msg);
   hist.push({role:'user', content:msg});
 
-  // First try AI
-  addBot(lang==='es'?'Recibí tu consulta. Déjame ver si puedo ayudarte…':'Got your question. Let me see if I can help…');
+  addBot(lang==='es'?'Recibí tu consulta, se la reenvío a Pilar ahora mismo 🙏':'Got your question, forwarding it to Pilar right now 🙏');
 
-  await notifyByEmail(
-    `💬 Guest question — Dársena 9`,
-    `Guest question:\n\n"${msg}"\n\nCheck-in: ${fmt(reservationDates.checkin)||'not provided'}\nCheck-out: ${fmt(reservationDates.checkout)||'not provided'}\n\nPlease reply via Airbnb.`
-  );
+  // Send via Google Script
+  try {
+    await fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        type: 'question',
+        question: msg,
+        guestName: guestName || 'Guest',
+        checkin: fmt(reservationDates.checkin) || 'No especificado',
+        checkout: fmt(reservationDates.checkout) || 'No especificado',
+        photos: [],
+        folderId: FOLDER_ID
+      })
+    });
+  } catch(e){ console.error('Question notification error:', e); }
 
-  const waMsg=`💬 *Guest Question — Dársena 9*\n\n"${msg}"\n\nPlease reply via Airbnb. 🙏`;
-  addWACard(waMsg,`<strong>${lang==='es'?'✅ Consulta enviada a Pilar':'✅ Question sent to Pilar'}</strong>${lang==='es'?'Te responderá por Airbnb en breve. También podés escribirle:':'She\'ll reply via Airbnb shortly. You can also reach her:'}`);
+  addWACard('',`<strong>${lang==='es'?'✅ Consulta enviada a Pilar':'✅ Question sent to Pilar'}</strong>${lang==='es'?'<br>Te responderá por Airbnb en breve.':'<br>She\'ll reply via Airbnb shortly.'}`);
   hist.push({role:'assistant', content:`Forwarded question to Pilar: "${msg}"`});
 }
 

@@ -853,7 +853,6 @@ async function submitGolfForm(){
   const from = document.getElementById('gc-from')?.value;
   const to   = document.getElementById('gc-to')?.value;
   const size = document.getElementById('gc-size')?.value;
-  const pax  = document.getElementById('gc-pax')?.value;
   if(!from||!to){ alert(lang==='es'?'Ingresá las fechas.':'Please enter the dates.'); return; }
   if(to<=from){ alert(lang==='es'?'La fecha "hasta" debe ser posterior.':'End date must be after start date.'); return; }
 
@@ -870,13 +869,28 @@ async function submitGolfForm(){
     ?`¡Perfecto! 🛺 Le mando la solicitud a Pilar ahora mismo.<br><br><strong>Resumen:</strong><br>• Carrito: ${size} pasajeros<br>• Fechas: ${fmt(from)} al ${fmt(to)}<br>• Días: ${days}<br>• Total estimado: USD ${total}<br><br>Pilar te va a enviar el link de pago por Airbnb en breve. ¡Cualquier cosa me avisás! 😊`
     :`Perfect! 🛺 I'm sending your request to Pilar right now.<br><br><strong>Summary:</strong><br>• Golf cart: ${size} passengers<br>• Dates: ${fmt(from)} to ${fmt(to)}<br>• Days: ${days}<br>• Estimated total: USD ${total}<br><br>Pilar will send you the payment link via Airbnb shortly. Let me know if you need anything! 😊`);
 
-  await notifyByEmail(
-    `🛺 Golf cart request — Dársena 9`,
-    `Golf cart request:\n• Size: ${size} passengers\n• From: ${fmt(from)}\n• To: ${fmt(to)}\n• Days: ${days}\n• Guests: ${pax||'not specified'}\n• Estimated total: USD ${total}\n\nPlease send payment link via Airbnb.`
-  );
+  // Send via Google Script
+  try {
+    await fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        type: 'golf',
+        size: size,
+        from: fmt(from),
+        to: fmt(to),
+        days: days,
+        total: total,
+        photos: [],
+        guestName: guestName || 'Guest',
+        checkin: fmt(from),
+        checkout: fmt(to),
+        folderId: FOLDER_ID
+      })
+    });
+  } catch(e){ console.error('Golf notification error:', e); }
 
-  const waMsg=`🛺 *Golf Cart Request — Dársena 9*\n\n• ${size} passengers\n• ${fmt(from)} → ${fmt(to)} (${days} days)\n• Total: USD ${total}\n\nPlease send payment link via Airbnb. ✅`;
-  addWACard(waMsg,`<strong>${lang==='es'?'✅ Solicitud enviada a Pilar':'✅ Request sent to Pilar'}</strong>${lang==='es'?'Te enviará el link de pago por Airbnb.':'She\'ll send you the payment link via Airbnb.'}`);
+  addWACard('',`<strong>${lang==='es'?'✅ Solicitud enviada a Pilar':'✅ Request sent to Pilar'}</strong>${lang==='es'?'<br>Te enviará el link de pago por Airbnb.':'<br>She\'ll send you the payment link via Airbnb.'}`);
   hist.push({role:'assistant', content:`Golf cart ${size}pax requested for ${days} days. Pilar notified.`});
 }
 

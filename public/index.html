@@ -536,10 +536,20 @@ async function callAI(){
 
     if(esc){
       addBot(lang==='es'
-        ?'Entiendo, le voy a avisar a Pilar para que te contacte directamente 🙏'
-        :'Got it, I\'ll notify Pilar so she can contact you directly 🙏');
-      addWACard('',`<strong>${lang==='es'?'Contactá a Pilar directamente por Airbnb':'Contact Pilar directly on Airbnb'}</strong>${lang==='es'?'<br>Ella te responderá a la brevedad.':'<br>She\'ll reply as soon as possible.'}`);
-      hist.push({role:'assistant', content:'Escalated to Pilar.'});
+        ?'Para esto es mejor que hables directamente con Pilar por Airbnb — ella te va a responder a la brevedad 🙏'
+        :'For this it\'s best to contact Pilar directly on Airbnb — she\'ll reply as soon as possible 🙏');
+      const c=document.getElementById('chat');
+      const d=document.createElement('div');
+      d.className='wa-card';
+      d.innerHTML=`<div class="wicon">💬</div>
+        <div class="wbody">
+          <strong>${lang==='es'?'Contactá a Pilar por Airbnb':'Contact Pilar on Airbnb'}</strong>
+          <a class="wa-link" href="https://www.airbnb.com/messaging/inbox" target="_blank" style="background:#FF5A5F;margin-top:9px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;text-decoration:none;color:#fff;">
+            🏠 ${lang==='es'?'Ir al chat de Airbnb':'Go to Airbnb chat'}
+          </a>
+        </div>`;
+      c.appendChild(d); c.scrollTop=c.scrollHeight;
+      hist.push({role:'assistant', content:'Escalated to Pilar via Airbnb.'});
     } else {
       addBot(raw);
       hist.push({role:'assistant', content:raw});
@@ -643,41 +653,17 @@ function submitDates(){
 function showIDCard(){
   addCard(`
     <div class="card-title">🛂 ${lang==='es'?'Documentos de identidad':'ID Documents'}</div>
-    <div class="card-sub">${lang==='es'?'Elegí cómo enviar la info.':'Choose how to share your documents.'}</div>
-    <div class="mode-toggle">
-      <button class="mode-btn active" id="mb-photo" onclick="switchMode('photo')">📷 ${lang==='es'?'Subir documento':'Upload ID'}</button>
-      <button class="mode-btn" id="mb-text" onclick="switchMode('text')">✏️ ${lang==='es'?'Ingresar datos':'Enter details'}</button>
-    </div>
-    <div id="photo-mode">
-      <label class="upload-label" id="upload-label">
-        <div class="dz-icon">📄</div>
-        <div class="dz-main">${lang==='es'?'Tocá para subir documento':'Tap to upload ID document'}</div>
-        <div class="dz-sub">${lang==='es'?'Pasaporte o cédula · Varios a la vez':'Passport or ID card · Multiple files ok'}</div>
-      </label>
-      <input type="file" id="photo-input" accept="image/*" multiple onchange="onPhotoChange(event)">
-      <div class="photo-grid" id="photo-grid"></div>
-      <div class="photo-count" id="photo-count" style="display:none"></div>
-      <div class="progress-wrap" id="prog-wrap">
-        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
-        <div class="progress-text" id="prog-text"></div>
+    <div class="card-sub">${lang==='es'?'Ingresá el nombre completo y número de documento de cada integrante.':'Enter the full name and document number for each guest.'}</div>
+    <div class="guest-list" id="guest-list">
+      <div class="guest-row" id="grow-1">
+        <span class="gnum">1.</span>
+        <input class="id-input" placeholder="${lang==='es'?'Nombre completo':'Full name'}" id="gname-1" style="flex:1.4">
+        <input class="id-input" placeholder="${lang==='es'?'N° pasaporte/doc':'Passport/ID number'}" id="gdoc-1" style="flex:1">
       </div>
-      <button class="submit-btn" id="photo-submit" onclick="submitPhotos()" disabled>${lang==='es'?'Enviar documentos →':'Send documents →'}</button>
     </div>
-    <div id="text-mode" style="display:none">
-      <div class="guest-list" id="guest-list">
-        <div class="guest-row" id="grow-1">
-          <span class="gnum">1.</span>
-          <input class="id-input" placeholder="${lang==='es'?'Nombre completo':'Full name'}" id="gname-1" style="flex:1.4">
-          <input class="id-input" placeholder="${lang==='es'?'N° pasaporte/doc':'Passport/ID number'}" id="gdoc-1" style="flex:1">
-        </div>
-      </div>
-      <button class="add-btn" onclick="addGuestRow()">+ ${lang==='es'?'Agregar integrante':'Add guest'}</button>
-      <button class="submit-btn" onclick="submitText()">${lang==='es'?'Enviar datos →':'Send details →'}</button>
-    </div>
+    <button class="add-btn" onclick="addGuestRow()">+ ${lang==='es'?'Agregar integrante':'Add guest'}</button>
+    <button class="submit-btn" onclick="submitText()">${lang==='es'?'Enviar datos →':'Send details →'}</button>
   `, 'navy-border');
-
-  // Wire up label → input
-  document.getElementById('upload-label').addEventListener('click', ()=>document.getElementById('photo-input').click());
 }
 
 function switchMode(m){

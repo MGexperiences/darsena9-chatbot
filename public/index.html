@@ -625,13 +625,25 @@ function addAccessBtn(){
 function startIDFlow(){
   addUser(lang==='es'?'Necesito el código de acceso al resort':'I need the resort access code');
   hist.push({role:'user', content:'Needs resort access code.'});
-  uploadedPhotos=[]; guestCount=1; reservationDates={checkin:'',checkout:''}; guestName='';
-  setTimeout(()=>{
-    addBot(lang==='es'
-      ?'¡Perfecto! Necesito algunos datos para coordinar el acceso al resort:'
-      :'Perfect! I need a few details to coordinate your resort access:');
-    setTimeout(showDateCard, 350);
-  }, 400);
+  uploadedPhotos=[]; guestCount=1;
+
+  // If we already have name and dates, skip straight to ID form
+  if(guestName && reservationDates.checkin && reservationDates.checkout){
+    setTimeout(()=>{
+      addBot(lang==='es'
+        ?`¡Perfecto ${guestName.split(' ')[0]}! Ya tengo tus datos (${fmt(reservationDates.checkin)} al ${fmt(reservationDates.checkout)}). Solo necesito los documentos de identidad:`
+        :`Perfect ${guestName.split(' ')[0]}! I already have your details (${fmt(reservationDates.checkin)} to ${fmt(reservationDates.checkout)}). I just need the ID documents:`);
+      setTimeout(showIDCard, 350);
+    }, 400);
+  } else {
+    reservationDates={checkin:'',checkout:''}; guestName='';
+    setTimeout(()=>{
+      addBot(lang==='es'
+        ?'¡Perfecto! Necesito algunos datos para coordinar el acceso al resort:'
+        :'Perfect! I need a few details to coordinate your resort access:');
+      setTimeout(showDateCard, 350);
+    }, 400);
+  }
 }
 
 function showDateCard(){

@@ -352,36 +352,118 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('What is the Casa de Campo resort fee?')">🏖 Resort fee</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
-  // ── Recuperar huésped de localStorage ─────────────────────────
+  // ── Primero intentar localStorage, luego iCal ──────────────────
   const saved = loadGuestFromLS();
 
   if (saved) {
-    // Huésped conocido: restaurar estado
+    // Huésped conocido por localStorage
     guestName = saved.name;
     reservationDates = { checkin: saved.checkin, checkout: saved.checkout };
     const first = saved.name.split(' ')[0];
-
     document.getElementById('welcome-msg').innerHTML = l==='es'
       ? `¡Bienvenido de nuevo al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
       : `Welcome back to <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
-
-    // Mostrar banner con datos del huésped
     setTimeout(() => showReturningBanner(first, saved.checkin, saved.checkout), 300);
-
-    hist.push({role:'assistant', content: l==='es'
-      ? `Huésped recurrente reconocido: ${saved.name}. Check-in: ${saved.checkin}, Check-out: ${saved.checkout}`
-      : `Returning guest recognized: ${saved.name}. Check-in: ${saved.checkin}, Check-out: ${saved.checkout}`});
-
+    hist.push({role:'assistant', content:`Returning guest from localStorage: ${saved.name}.`});
   } else {
-    // Huésped nuevo
+    // Intentar leer del iCal de Airbnb
     document.getElementById('welcome-msg').innerHTML = l==='es'
-      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. Para coordinar el ingreso al resort, tocá <strong>🔑 Acceso al resort</strong> y enviá tu documento de identidad. ¡Cualquier consulta con gusto te ayudo! 😊`
-      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. To coordinate your resort access, tap <strong>🔑 Resort access</strong> and send your ID document. Happy to help with anything! 😊`;
-
-    hist.push({role:'assistant', content: l==='es'
-      ? 'Huésped nuevo. Saludé y ofrecí ayuda.'
-      : 'New guest. Greeted and offered help.'});
+      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
+      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
+    fetchIcal(l);
   }
+}
+
+// ── Fetch iCal y detectar reserva activa/próxima ──────────────────
+async function fetchIcal(l) {
+  try {
+    const r = await fetch('/api/ical');
+    const data = await r.json();
+
+    if (!data.success) throw new Error(data.error);
+
+    const today = new Date().toISOString().split('T')[0];
+    const reservation = data.active || data.upcoming;
+
+    if (reservation && reservation.checkin && reservation.checkout) {
+      // Extraer nombre del huésped del iCal
+      // Airbnb usa SUMMARY para el nombre — puede ser "Nombre Apellido" o "Airbnb (reservado)"
+      const rawName = reservation.summary || '';
+      const isAnonymous = rawName.toLowerCase().includes('airbnb') ||
+                          rawName.toLowerCase().includes('reservado') ||
+                          rawName.toLowerCase().includes('reserved') ||
+                          rawName === '';
+
+      reservationDates = { checkin: reservation.checkin, checkout: reservation.checkout };
+
+      if (!isAnonymous) {
+        // Tenemos el nombre completo del huésped
+        guestName = rawName;
+        const first = rawName.split(' ')[0];
+        saveGuestToLS();
+
+        document.getElementById('welcome-msg').innerHTML = l==='es'
+          ? `¡Bienvenido al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
+          : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
+
+        setTimeout(() => {
+          showReturningBanner(first, reservation.checkin, reservation.checkout);
+          hist.push({role:'assistant', content:`Guest from iCal: ${guestName}. Check-in: ${reservation.checkin}, Check-out: ${reservation.checkout}`});
+        }, 300);
+
+      } else {
+        // iCal anónimo — tenemos fechas pero no nombre, mostramos banner de fechas
+        document.getElementById('welcome-msg').innerHTML = l==='es'
+          ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. ¡Cualquier consulta con gusto te ayudo! 😊`
+          : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. Happy to help with anything! 😊`;
+
+        setTimeout(() => {
+          showDatesFoundBanner(reservation.checkin, reservation.checkout, l);
+          hist.push({role:'assistant', content:`Reservation found in iCal (anonymous). Check-in: ${reservation.checkin}, Check-out: ${reservation.checkout}`});
+        }, 300);
+      }
+
+    } else {
+      // No hay reserva activa ni próxima en el iCal
+      showNewGuestWelcome(l);
+    }
+
+  } catch(err) {
+    console.error('iCal fetch error:', err);
+    // Fallback: flujo normal de huésped nuevo
+    showNewGuestWelcome(l);
+  }
+}
+
+// ── Banner cuando encontramos fechas pero no nombre ───────────────
+function showDatesFoundBanner(checkin, checkout, l) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'return-banner';
+  d.innerHTML = `
+    <div class="rb-icon">📅</div>
+    <div class="rb-body">
+      <div class="rb-name">${l==='es'?'Encontré tu reserva:':'Found your reservation:'}</div>
+      <div class="rb-dates">${fmt(checkin)} → ${fmt(checkout)}</div>
+    </div>
+    <button class="rb-clear" onclick="handleClearGuest()" title="${l==='es'?'No es mía':'Not mine'}">
+      ${l==='es'?'No es mía':'Not mine'}
+    </button>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+
+  // Con las fechas ya conocidas, si toca Resort access solo pide nombre
+  addBot(l==='es'
+    ? `¡Hola! Ya tengo tus fechas (${fmt(checkin)} al ${fmt(checkout)}). Para coordinar el acceso al resort tocá 🔑 <strong>Acceso al resort</strong> — solo voy a pedirte tu nombre y los documentos 😊`
+    : `Hi! I already have your dates (${fmt(checkin)} to ${fmt(checkout)}). To coordinate resort access tap 🔑 <strong>Resort access</strong> — I'll only need your name and documents 😊`);
+}
+
+// ── Welcome para huésped nuevo sin reserva en iCal ───────────────
+function showNewGuestWelcome(l) {
+  document.getElementById('welcome-msg').innerHTML = l==='es'
+    ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. Para coordinar el ingreso al resort, tocá <strong>🔑 Acceso al resort</strong> y enviá tu documento de identidad. ¡Cualquier consulta con gusto te ayudo! 😊`
+    : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. To coordinate your resort access, tap <strong>🔑 Resort access</strong> and send your ID document. Happy to help with anything! 😊`;
+  hist.push({role:'assistant', content: l==='es' ? 'Huésped nuevo. Saludé y ofrecí ayuda.' : 'New guest. Greeted and offered help.'});
 }
 
 function showReturningBanner(first, checkin, checkout) {
@@ -674,14 +756,25 @@ function startIDFlow(){
   uploadedPhotos=[]; guestCount=1;
 
   if(guestName && reservationDates.checkin && reservationDates.checkout){
-    // Huésped ya conocido (localStorage o misma sesión)
+    // Nombre y fechas conocidos (localStorage o iCal con nombre)
     setTimeout(()=>{
       addBot(lang==='es'
         ?`¡Perfecto ${guestName.split(' ')[0]}! Ya tengo tus datos (${fmt(reservationDates.checkin)} al ${fmt(reservationDates.checkout)}). Solo necesito los documentos de identidad:`
         :`Perfect ${guestName.split(' ')[0]}! I already have your details (${fmt(reservationDates.checkin)} to ${fmt(reservationDates.checkout)}). I just need the ID documents:`);
       setTimeout(showIDCard, 350);
     }, 400);
+
+  } else if(!guestName && reservationDates.checkin && reservationDates.checkout){
+    // Fechas conocidas por iCal pero sin nombre — solo pedir nombre
+    setTimeout(()=>{
+      addBot(lang==='es'
+        ?`¡Perfecto! Ya tengo tus fechas (${fmt(reservationDates.checkin)} al ${fmt(reservationDates.checkout)}). Solo necesito tu nombre para continuar:`
+        :`Perfect! I already have your dates (${fmt(reservationDates.checkin)} to ${fmt(reservationDates.checkout)}). I just need your name to continue:`);
+      setTimeout(showNameOnlyCard, 350);
+    }, 400);
+
   } else {
+    // Huésped nuevo — pedir todo
     reservationDates={checkin:'',checkout:''}; guestName='';
     setTimeout(()=>{
       addBot(lang==='es'
@@ -690,6 +783,36 @@ function startIDFlow(){
       setTimeout(showDateCard, 350);
     }, 400);
   }
+}
+
+// ── Card solo nombre (cuando iCal ya dio las fechas) ─────────────
+function showNameOnlyCard(){
+  addCard(`
+    <div class="card-title">👤 ${lang==='es'?'Tu nombre':'Your name'}</div>
+    <div class="card-sub">${lang==='es'?'Ingresá el nombre del huésped principal.':'Enter the main guest\'s name.'}</div>
+    <div class="form-grid">
+      <div class="form-field"><label>${lang==='es'?'Nombre':'First name'}</label>
+        <input type="text" class="form-input" id="guest-firstname" placeholder="${lang==='es'?'ej. María':'e.g. Maria'}"></div>
+      <div class="form-field"><label>${lang==='es'?'Apellido':'Last name'}</label>
+        <input type="text" class="form-input" id="guest-lastname" placeholder="${lang==='es'?'ej. González':'e.g. Smith'}"></div>
+    </div>
+    <button class="submit-btn" onclick="submitNameOnly()">${lang==='es'?'Confirmar →':'Confirm →'}</button>
+  `, 'navy-border');
+}
+
+function submitNameOnly(){
+  const firstname = document.getElementById('guest-firstname')?.value.trim();
+  const lastname  = document.getElementById('guest-lastname')?.value.trim();
+  if(!firstname||!lastname){ alert(lang==='es'?'Ingresá nombre y apellido.':'Please enter first and last name.'); return; }
+  guestName = `${firstname} ${lastname}`;
+  saveGuestToLS();
+  document.querySelectorAll('.card').forEach(c=>c.remove());
+  addUser(`${guestName}`);
+  hist.push({role:'user', content:`Guest name: ${guestName}. Dates already known: ${reservationDates.checkin} to ${reservationDates.checkout}`});
+  addBot(lang==='es'
+    ?`¡Gracias, <strong>${firstname}</strong>! Ahora necesito el documento de identidad de cada integrante:`
+    :`Thanks, <strong>${firstname}</strong>! Now I need the ID document for each guest:`);
+  setTimeout(showIDCard, 350);
 }
 
 function showDateCard(){

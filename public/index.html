@@ -111,25 +111,6 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
   font-family:'Jost',sans-serif;font-size:13px;color:var(--text);background:var(--sand);outline:none;
   transition:border-color .2s;width:100%;}
 .form-input:focus{border-color:var(--gold);}
-.mode-toggle{display:flex;margin-bottom:13px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.mode-btn{flex:1;padding:8px 0;font-family:'Jost',sans-serif;font-size:12px;
-  border:none;background:var(--sand);color:var(--muted);cursor:pointer;transition:all .2s;}
-.mode-btn.active{background:var(--navy);color:var(--goldl);font-weight:500;}
-.upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
-  border:2px dashed var(--border);border-radius:12px;padding:20px 14px;text-align:center;
-  cursor:pointer;transition:all .2s;background:var(--sand);margin-bottom:10px;}
-.upload-label:hover{border-color:var(--navy);background:#eef0f7;}
-.upload-label .dz-icon{font-size:28px;}
-.upload-label .dz-main{font-size:13px;font-weight:500;color:var(--navy);}
-.upload-label .dz-sub{font-size:11px;color:var(--muted);}
-#photo-input{display:none;}
-.photo-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
-.photo-thumb{position:relative;width:68px;height:68px;border-radius:10px;overflow:hidden;border:2px solid var(--border);}
-.photo-thumb img{width:100%;height:100%;object-fit:cover;}
-.photo-thumb .rm{position:absolute;top:2px;right:2px;width:18px;height:18px;
-  background:rgba(0,0,0,.65);border:none;border-radius:50%;color:#fff;font-size:11px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.photo-count{font-size:12px;color:var(--navy);font-weight:500;margin-bottom:9px;}
 .guest-list{display:flex;flex-direction:column;gap:7px;margin-bottom:9px;}
 .guest-row{display:flex;gap:6px;align-items:center;}
 .gnum{font-size:11px;color:var(--muted);min-width:16px;text-align:right;flex-shrink:0;}
@@ -148,10 +129,6 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
   cursor:pointer;transition:background .2s;width:100%;margin-top:4px;}
 .submit-btn:hover{background:var(--navy2);}
 .submit-btn:disabled{opacity:.4;cursor:not-allowed;}
-.progress-wrap{margin:7px 0;display:none;}
-.progress-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .3s ease;width:0%;}
-.progress-text{font-size:11px;color:var(--muted);margin-top:4px;text-align:center;}
 
 /* WA CARD */
 .wa-card{background:#f0faf4;border:1px solid #b8dfc7;border-radius:14px;padding:13px 15px;
@@ -160,9 +137,8 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
 .wa-card .wbody{font-size:13px;color:#2d6a4f;line-height:1.45;width:100%;}
 .wa-card .wbody strong{display:block;font-weight:500;margin-bottom:3px;}
 .wa-link{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:9px;
-  background:#25d366;color:#fff;padding:10px 16px;border-radius:12px;
+  color:#fff;padding:10px 16px;border-radius:12px;
   font-size:13px;font-weight:600;text-decoration:none;transition:background .2s;}
-.wa-link:hover{background:#1ebe57;}
 
 /* QUICK ACTIONS */
 .qa{background:#fff;border-top:1px solid var(--border);padding:10px 12px;
@@ -196,6 +172,19 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
   font-family:'Jost',sans-serif;font-size:13px;color:var(--text);background:var(--sand);
   outline:none;resize:none;width:100%;}
 .other-form textarea:focus{border-color:var(--gold);}
+
+/* RETURNING GUEST BANNER */
+.return-banner{background:linear-gradient(135deg,#1a3a2a,#1a2535);border:1px solid rgba(201,168,76,.25);
+  border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px;
+  animation:fu .25s ease;max-width:95%;align-self:flex-start;}
+.return-banner .rb-icon{font-size:20px;flex-shrink:0;}
+.return-banner .rb-body{flex:1;}
+.return-banner .rb-name{font-size:14px;font-weight:500;color:var(--goldl);margin-bottom:2px;}
+.return-banner .rb-dates{font-size:12px;color:rgba(232,204,136,.6);}
+.return-banner .rb-clear{background:none;border:1px solid rgba(201,168,76,.2);border-radius:8px;
+  padding:5px 10px;font-family:'Jost',sans-serif;font-size:11px;color:rgba(232,204,136,.5);
+  cursor:pointer;transition:all .2s;white-space:nowrap;}
+.return-banner .rb-clear:hover{border-color:rgba(201,168,76,.5);color:var(--goldl);}
 </style>
 </head>
 <body>
@@ -246,9 +235,7 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
   </div>
 
   <!-- QUICK ACTIONS -->
-  <div class="qa" id="qa-bar">
-    <!-- populated by setLang() -->
-  </div>
+  <div class="qa" id="qa-bar"></div>
 
   <!-- INPUT -->
   <div class="inp-area">
@@ -264,16 +251,9 @@ body{font-family:'Jost',sans-serif;background:#0f1824;min-height:100vh;
 
 <script>
 // ── Constants ─────────────────────────────────────────────────────
-const WA            = '5491164388699';
 const GDRIVE_SCRIPT = 'https://script.google.com/macros/s/AKfycbzz3yaqNPRAJQvt7dohZPX91zcMasBvZ5ebNarsI0L8oPFmkWDXtGaR9ZPgcxhz0ApiNw/exec';
 const FOLDER_ID     = '1WMsYjyFwfNJJsa-ifOp3zAKowx4C1HKC';
-const EJS = {
-  publicKey: 'GBnQIXu2o7Cmx6gka',
-  serviceId: 'service_q17d49a',
-  templateId:'template_7v697lw',
-  toEmail:   'macchiavello.luciano1@gmail.com'
-};
-
+const LS_KEY        = 'd9_guest_v1'; // versión para poder invalidar en el futuro
 
 // ── State ─────────────────────────────────────────────────────────
 let cfg   = { extraNotes:'' };
@@ -282,14 +262,49 @@ let lang  = 'en';
 let uploadedPhotos = [];
 let guestCount = 1;
 let reservationDates = { checkin:'', checkout:'' };
-let guestName = ''; // full name for Drive subfolder
+let guestName = '';
+
+// ── localStorage helpers ──────────────────────────────────────────
+function saveGuestToLS() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      name:     guestName,
+      checkin:  reservationDates.checkin,
+      checkout: reservationDates.checkout,
+      lang:     lang,
+      saved:    new Date().toISOString()
+    }));
+  } catch(e) { console.warn('localStorage not available:', e); }
+}
+
+function loadGuestFromLS() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const g = JSON.parse(raw);
+    // Solo válido si el checkout no pasó todavía
+    if (g.checkout && new Date(g.checkout + 'T23:59:59') >= new Date()) {
+      return g;
+    }
+    // Expirado: limpiar
+    localStorage.removeItem(LS_KEY);
+    return null;
+  } catch(e) { return null; }
+}
+
+function clearGuestFromLS() {
+  try { localStorage.removeItem(LS_KEY); } catch(e) {}
+  guestName = '';
+  reservationDates = { checkin:'', checkout:'' };
+  window.docsSubmitted = false;
+}
 
 // ── Init ──────────────────────────────────────────────────────────
 const T = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 document.getElementById('wt').textContent  = T;
 document.getElementById('wt2').textContent = T;
 
-// Show language selector first
+// Mostrar selector de idioma
 document.getElementById('welcome-msg').innerHTML =
   `<span style="font-size:15px;font-weight:500;color:var(--navy)">¡Hola! 👋  Hello!</span><br>
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
@@ -313,10 +328,7 @@ function setLang(l){
   lang = l;
   document.getElementById('inp').placeholder = l==='es'?'Escribí tu consulta…':'Type your question…';
 
-  document.getElementById('welcome-msg').innerHTML = l==='es'
-    ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. Para coordinar el ingreso al resort, tocá <strong>🔑 Acceso al resort</strong> y enviá tu documento de identidad. ¡Cualquier consulta con gusto te ayudo! 😊`
-    : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. To coordinate your resort access, tap <strong>🔑 Resort access</strong> and send your ID document. Happy to help with anything! 😊`;
-
+  // Quick actions bar
   const qa = document.getElementById('qa-bar');
   qa.innerHTML = l==='es'
     ? `<button class="qbtn" onclick="startIDFlow()">🔑 Acceso al resort</button>
@@ -340,14 +352,69 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('What is the Casa de Campo resort fee?')">🏖 Resort fee</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
-  hist.push({role:'assistant', content: l==='es'
-    ? 'Huésped eligió español. Saludé y ofrecí ayuda.'
-    : 'Guest chose English. Greeted and offered help.'});
+  // ── Recuperar huésped de localStorage ─────────────────────────
+  const saved = loadGuestFromLS();
+
+  if (saved) {
+    // Huésped conocido: restaurar estado
+    guestName = saved.name;
+    reservationDates = { checkin: saved.checkin, checkout: saved.checkout };
+    const first = saved.name.split(' ')[0];
+
+    document.getElementById('welcome-msg').innerHTML = l==='es'
+      ? `¡Bienvenido de nuevo al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
+      : `Welcome back to <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
+
+    // Mostrar banner con datos del huésped
+    setTimeout(() => showReturningBanner(first, saved.checkin, saved.checkout), 300);
+
+    hist.push({role:'assistant', content: l==='es'
+      ? `Huésped recurrente reconocido: ${saved.name}. Check-in: ${saved.checkin}, Check-out: ${saved.checkout}`
+      : `Returning guest recognized: ${saved.name}. Check-in: ${saved.checkin}, Check-out: ${saved.checkout}`});
+
+  } else {
+    // Huésped nuevo
+    document.getElementById('welcome-msg').innerHTML = l==='es'
+      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. Para coordinar el ingreso al resort, tocá <strong>🔑 Acceso al resort</strong> y enviá tu documento de identidad. ¡Cualquier consulta con gusto te ayudo! 😊`
+      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. To coordinate your resort access, tap <strong>🔑 Resort access</strong> and send your ID document. Happy to help with anything! 😊`;
+
+    hist.push({role:'assistant', content: l==='es'
+      ? 'Huésped nuevo. Saludé y ofrecí ayuda.'
+      : 'New guest. Greeted and offered help.'});
+  }
 }
 
-// Default to English on load
+function showReturningBanner(first, checkin, checkout) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'return-banner';
+  d.innerHTML = `
+    <div class="rb-icon">👋</div>
+    <div class="rb-body">
+      <div class="rb-name">${lang==='es'?'¡Hola de nuevo, ':'Welcome back, '}${first}!</div>
+      <div class="rb-dates">📅 ${fmt(checkin)} → ${fmt(checkout)}</div>
+    </div>
+    <button class="rb-clear" onclick="handleClearGuest()" title="${lang==='es'?'No soy yo':'Not me'}">
+      ${lang==='es'?'No soy yo':'Not me'}
+    </button>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function handleClearGuest() {
+  clearGuestFromLS();
+  // Limpiar chat y reiniciar
+  const c = document.getElementById('chat');
+  // Remover el banner
+  c.querySelectorAll('.return-banner').forEach(el => el.remove());
+  addBot(lang==='es'
+    ? 'Perfecto, empecemos de cero. Para coordinar el acceso al resort, tocá 🔑 Acceso al resort.'
+    : 'No problem, let\'s start fresh. To coordinate resort access, tap 🔑 Resort access.');
+  hist.push({role:'assistant', content:'Guest cleared their saved data and restarted.'});
+}
+
+// Default a inglés al cargar, luego restaurar el bilingual welcome
 setLang('en');
-// Re-inject the bilingual welcome (setLang overwrites it, we restore it)
 document.getElementById('welcome-msg').innerHTML =
   `<span style="font-size:15px;font-weight:500;color:var(--navy)">¡Hola! 👋  Hello!</span><br>
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
@@ -377,7 +444,7 @@ PERSONALIDAD DE PILAR:
 PROPIEDAD — DÁRSENA 9:
 - Townhouse 3 niveles | 8 huéspedes | 3 dorm | 4 camas | 3 baños privados
 - Dorm 1: cama king, AC, baño privado
-- Dorm 2: 2 camas queen, baño privado  
+- Dorm 2: 2 camas queen, baño privado
 - Dorm 3: cama doble, baño privado
 - Check-in: 3:00 PM | Check-out: 11:00 AM (estricto si hay reservas consecutivas)
 - WiFi: "lacautiva" / "lacautiva 2" / "lacautiva 3" (la de mejor señal)
@@ -472,12 +539,6 @@ function showTyping(){
 }
 function rmTyping(){ const d=document.getElementById('typ'); if(d)d.remove(); }
 
-// ── Email notifications handled by Google Script ─────────────────
-async function notifyByEmail(subject, body){
-  // Emails are now sent automatically by the Google Apps Script
-  // when documents are uploaded to Drive. No action needed here.
-}
-
 // ── Google Drive upload ───────────────────────────────────────────
 async function uploadToDrive(photos){
   const photoData = photos.map((p,i)=>({
@@ -499,7 +560,6 @@ async function uploadToDrive(photos){
       })
     });
     const result = await r.json();
-    console.log('Drive upload result:', result);
     return result.success;
   } catch(e){
     console.error('Drive upload error:', e);
@@ -523,19 +583,12 @@ async function callAI(){
     const r = await fetch("/api/chat",{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        system: sys(),
-        messages: hist
-      })
+      body: JSON.stringify({ system: sys(), messages: hist })
     });
-
     if(!r.ok) throw new Error('HTTP error: ' + r.status);
-
     const data = await r.json();
     rmTyping();
-
     if(data.error) throw new Error(data.error);
-
     const raw = (data.reply || '').trim();
     let esc=false, sum='';
     try{ const p=JSON.parse(raw); if(p.escalate){esc=true; sum=p.summary||'';} }catch(_){}
@@ -544,8 +597,6 @@ async function callAI(){
       addBot(lang==='es'
         ?'Para esto es mejor que hables directamente con Pilar por Airbnb — ella te va a responder a la brevedad 🙏'
         :'For this it\'s best to contact Pilar directly on Airbnb — she\'ll reply as soon as possible 🙏');
-
-      // Also send email with context
       try {
         await fetch('/api/drive-upload', {
           method: 'POST',
@@ -561,7 +612,6 @@ async function callAI(){
           })
         });
       } catch(e2){ console.error('Escalation notify error:', e2); }
-
       const c=document.getElementById('chat');
       const d=document.createElement('div');
       d.className='wa-card';
@@ -577,7 +627,6 @@ async function callAI(){
     } else {
       addBot(raw);
       hist.push({role:'assistant', content:raw});
-      // If response mentions access code or documents, show shortcut button
       const accessKeywords = ['código de acceso','code','documentos','documents','pasaporte','passport','identidad','identity','acceso al resort','resort access'];
       if(accessKeywords.some(k => raw.toLowerCase().includes(k))){
         addAccessBtn();
@@ -585,7 +634,6 @@ async function callAI(){
     }
   } catch(e){
     rmTyping();
-    console.error('AI error:', e);
     addBot(lang==='es'
       ?'Uy, tuve un problemita técnico 😅 Podés escribirle a Pilar directamente por Airbnb.'
       :'Oops, I had a small technical issue 😅 You can contact Pilar directly on Airbnb.');
@@ -606,9 +654,7 @@ function sendMsg(){
 
 // ── Access button shortcut ────────────────────────────────────────
 function addAccessBtn(){
-  // Don't show if documents already submitted
   if(window.docsSubmitted) return;
-  // Remove any existing access buttons first
   document.querySelectorAll('.access-btn-row').forEach(el=>el.remove());
   const c=document.getElementById('chat');
   const d=document.createElement('div');
@@ -627,8 +673,8 @@ function startIDFlow(){
   hist.push({role:'user', content:'Needs resort access code.'});
   uploadedPhotos=[]; guestCount=1;
 
-  // If we already have name and dates, skip straight to ID form
   if(guestName && reservationDates.checkin && reservationDates.checkout){
+    // Huésped ya conocido (localStorage o misma sesión)
     setTimeout(()=>{
       addBot(lang==='es'
         ?`¡Perfecto ${guestName.split(' ')[0]}! Ya tengo tus datos (${fmt(reservationDates.checkin)} al ${fmt(reservationDates.checkout)}). Solo necesito los documentos de identidad:`
@@ -675,8 +721,13 @@ function submitDates(){
   if(!firstname||!lastname){ alert(lang==='es'?'Ingresá nombre y apellido.':'Please enter first and last name.'); return; }
   if(!ci||!co){ alert(lang==='es'?'Ingresá ambas fechas.':'Please enter both dates.'); return; }
   if(co<=ci){ alert(lang==='es'?'Check-out debe ser posterior.':'Check-out must be after check-in.'); return; }
+
   guestName = `${firstname} ${lastname}`;
-  reservationDates={checkin:ci, checkout:co};
+  reservationDates = {checkin:ci, checkout:co};
+
+  // ── Guardar en localStorage ────────────────────────────────────
+  saveGuestToLS();
+
   document.querySelectorAll('.card').forEach(c=>c.remove());
   addUser(`${guestName}\nCheck-in: ${fmt(ci)}\nCheck-out: ${fmt(co)}`);
   hist.push({role:'user', content:`Guest: ${guestName}. Stay: ${ci} to ${co}`});
@@ -700,106 +751,6 @@ function showIDCard(){
     <button class="add-btn" onclick="addGuestRow()">+ ${lang==='es'?'Agregar integrante':'Add guest'}</button>
     <button class="submit-btn" onclick="submitText()">${lang==='es'?'Enviar datos →':'Send details →'}</button>
   `, 'navy-border');
-}
-
-function switchMode(m){
-  document.getElementById('photo-mode').style.display = m==='photo'?'block':'none';
-  document.getElementById('text-mode').style.display  = m==='text'?'block':'none';
-  document.getElementById('mb-photo').classList.toggle('active', m==='photo');
-  document.getElementById('mb-text').classList.toggle('active', m==='text');
-}
-
-// Photo handling
-function onPhotoChange(e){ handleFiles(Array.from(e.target.files)); e.target.value=''; }
-function handleFiles(files){
-  files.filter(f=>f.type.startsWith('image/')).forEach(f=>{
-    const r=new FileReader();
-    r.onload=ev=>{ uploadedPhotos.push({name:f.name, dataUrl:ev.target.result, file:f}); renderPhotos(); };
-    r.readAsDataURL(f);
-  });
-}
-function renderPhotos(){
-  const grid=document.getElementById('photo-grid');
-  const cnt=document.getElementById('photo-count');
-  const btn=document.getElementById('photo-submit');
-  if(!grid) return;
-  grid.innerHTML='';
-  uploadedPhotos.forEach((p,i)=>{
-    const t=document.createElement('div'); t.className='photo-thumb';
-    t.innerHTML=`<img src="${p.dataUrl}"><button class="rm" onclick="rmPhoto(${i})">×</button>`;
-    grid.appendChild(t);
-  });
-  const n=uploadedPhotos.length;
-  if(n>0){
-    cnt.style.display='block';
-    cnt.textContent=`✅ ${n} ${lang==='es'?`documento${n>1?'s':''} listo${n>1?'s':''}` : `document${n>1?'s':''} ready`}`;
-    btn.disabled=false;
-  } else { cnt.style.display='none'; btn.disabled=true; }
-}
-function rmPhoto(i){ uploadedPhotos.splice(i,1); renderPhotos(); }
-
-async function submitPhotos(){
-  const n=uploadedPhotos.length; if(!n) return;
-  const btn=document.getElementById('photo-submit');
-  const pw=document.getElementById('prog-wrap');
-  const pf=document.getElementById('prog-fill');
-  const pt=document.getElementById('prog-text');
-  btn.disabled=true; btn.textContent=lang==='es'?'Enviando…':'Sending…';
-  pw.style.display='block';
-  pt.textContent=lang==='es'?`Guardando ${n} documento${n>1?'s':''} de forma segura…`:`Securely saving ${n} document${n>1?'s':''}…`;
-  pf.style.width='40%';
-
-  document.querySelectorAll('.card').forEach(c=>c.remove());
-  document.querySelectorAll('.access-btn-row').forEach(el=>el.remove());
-  window.docsSubmitted = true;
-  addUser(lang==='es'?`🛂 Envié ${n} documento${n>1?'s':''} de identidad`:`🛂 Sent ${n} ID document${n>1?'s':''}`);
-  hist.push({role:'user', content:`Guest sent ${n} ID document(s). Dates: ${reservationDates.checkin} to ${reservationDates.checkout}`});
-
-  const confirmMsg = lang==='es'
-    ?`¡Perfecto, muchas gracias! 🙏 Recibí ${n>1?'los':'el'} ${n} documento${n>1?'s':''} correctamente.<br><br>Le aviso a Pilar para que genere el código de acceso al resort. Te lo va a enviar por Airbnb en breve 😊<br><br>🗓 <strong>Tu reserva:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} a partir de las <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} hasta las <strong>11:00 AM</strong><br><br>🔑 <strong>Acceso a la propiedad:</strong><br>• El portallaves está a la <strong>izquierda de la puerta principal</strong><br>• Código: <strong>0926</strong><br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
-    :`Thank you so much! 🙏 I received your ${n} ID document${n>1?'s':''} successfully.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>🗓 <strong>Your reservation:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} from <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} by <strong>11:00 AM</strong><br><br>🔑 <strong>Property access:</strong><br>• The lockbox is to the <strong>left of the main door</strong><br>• Code: <strong>0926</strong><br><br>📌 <strong>Resort fees charged at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`;
-  addBot(confirmMsg);
-
-  // Upload to Google Drive
-  try{ pf.style.width='70%'; await uploadToDrive(uploadedPhotos); pf.style.width='100%'; }catch(e){ console.error(e); }
-
-  // Email notification
-  await notifyByEmail(
-    `🛂 ${n} ID document${n>1?'s':''} received — Dársena 9`,
-    `${n} ID document${n>1?'s':''} saved to your private Google Drive.\n\nView folder: https://drive.google.com/drive/folders/${FOLDER_ID}\n\nCheck-in: ${fmt(reservationDates.checkin)}\nCheck-out: ${fmt(reservationDates.checkout)}\n\nPlease generate the resort access code and send via Airbnb.`
-  );
-
-  const waMsg=`🛂 *Townhouse Marina · Dársena 9*\n\n📅 Check-in: ${fmt(reservationDates.checkin)}\n📅 Check-out: ${fmt(reservationDates.checkout)}\n\n🔒 ${n} ID document${n>1?'s':''} saved to your private Drive.\n\nPlease generate the resort access code and send via Airbnb. ✅`;
-  addWACard(waMsg,`<strong>${lang==='es'?'✅ Documentos en tu Drive privado':'✅ Documents in your private Drive'}</strong>${lang==='es'?'Pilar fue notificada. También podés escribirle:':'Pilar was notified. You can also reach her:'}`);
-
-  // Show lockbox and door images
-  setTimeout(()=>{
-    const c=document.getElementById('chat');
-    const imgCard=document.createElement('div');
-    imgCard.className='card gold-border';
-    imgCard.style.maxWidth='95%';
-    imgCard.innerHTML=`
-      <div class="card-title">🔑 ${lang==='es'?'Acceso a la propiedad':'Property access'}</div>
-      <div class="card-sub" style="margin-bottom:10px;">${lang==='es'?'El portallaves está a la izquierda de la puerta principal. Código: <strong>0926</strong>':'The lockbox is to the left of the main door. Code: <strong>0926</strong>'}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Portallaves':'Lockbox'}</div>
-          <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400" 
-               style="width:100%;border-radius:10px;object-fit:cover;height:140px;" 
-               onerror="this.style.display='none'">
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Puerta principal':'Main door'}</div>
-          <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400" 
-               style="width:100%;border-radius:10px;object-fit:cover;height:140px;"
-               onerror="this.style.display='none'">
-        </div>
-      </div>`;
-    c.appendChild(imgCard);
-    c.scrollTop=c.scrollHeight;
-  }, 800);
-
-  hist.push({role:'assistant', content:'Documents saved to Drive. Pilar notified.'});
 }
 
 function addGuestRow(){
@@ -834,7 +785,6 @@ async function submitText(){
     ?`¡Perfecto, muchas gracias! 🙏 Recibí los datos de ${guests.length} integrante${guests.length>1?'s':''}.<br><br>Le aviso a Pilar para que genere el código de acceso. Te lo va a enviar por Airbnb en breve 😊<br><br>🗓 <strong>Tu reserva:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} a partir de las <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} hasta las <strong>11:00 AM</strong><br><br>🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código: <strong>0926</strong><br><br>📌 <strong>Tarifas del resort al ingreso:</strong><br>• 👤 USD 30 por adulto / noche<br>• 👧 USD 15 por niño (4-12 años) / noche<br>• 🍼 Menores de 4 años: sin cargo<br><br>¡Cualquier cosa me avisás! 😊`
     :`Thank you! 🙏 I received the details for ${guests.length} guest${guests.length>1?'s':''}.<br><br>I'm notifying Pilar to generate your resort access code. She'll send it via Airbnb shortly 😊<br><br>🗓 <strong>Your reservation:</strong><br>• 📅 Check-in: ${fmt(reservationDates.checkin)} from <strong>3:00 PM</strong><br>• 📅 Check-out: ${fmt(reservationDates.checkout)} by <strong>11:00 AM</strong><br><br>🔑 Lockbox is to the <strong>left of the main door</strong> · Code: <strong>0926</strong><br><br>📌 <strong>Resort fees at arrival:</strong><br>• 👤 USD 30 per adult / night<br>• 👧 USD 15 per child (4-12 yrs) / night<br>• 🍼 Under 4 years: free<br><br>Let me know if you need anything! 😊`);
 
-  // Send to Google Script
   try {
     await fetch('/api/drive-upload', {
       method: 'POST',
@@ -845,14 +795,45 @@ async function submitText(){
         guests: listTxt,
         checkin: fmt(reservationDates.checkin),
         checkout: fmt(reservationDates.checkout),
+        checkinRaw: reservationDates.checkin,
+        checkoutRaw: reservationDates.checkout,
         photos: [],
         folderId: FOLDER_ID
       })
     });
   } catch(e){ console.error('Notification error:', e); }
 
+  // Mostrar fotos del lockbox
+  setTimeout(showLockboxImages, 800);
+
   addWACard('', `<strong>${lang==='es'?'✅ Pilar fue notificada':'✅ Pilar was notified'}</strong>${lang==='es'?'<br>Te responderá por Airbnb en breve.':'<br>She\'ll reply via Airbnb shortly.'}`);
   hist.push({role:'assistant', content:'Guest details sent to Pilar.'});
+}
+
+function showLockboxImages(){
+  const c=document.getElementById('chat');
+  const imgCard=document.createElement('div');
+  imgCard.className='card gold-border';
+  imgCard.style.maxWidth='95%';
+  imgCard.innerHTML=`
+    <div class="card-title">🔑 ${lang==='es'?'Acceso a la propiedad':'Property access'}</div>
+    <div class="card-sub" style="margin-bottom:10px;">${lang==='es'?'El portallaves está a la izquierda de la puerta principal. Código: <strong>0926</strong>':'The lockbox is to the left of the main door. Code: <strong>0926</strong>'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Portallaves':'Lockbox'}</div>
+        <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
+             style="width:100%;border-radius:10px;object-fit:cover;height:140px;"
+             onerror="this.style.display='none'">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${lang==='es'?'Puerta principal':'Main door'}</div>
+        <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
+             style="width:100%;border-radius:10px;object-fit:cover;height:140px;"
+             onerror="this.style.display='none'">
+      </div>
+    </div>`;
+  c.appendChild(imgCard);
+  c.scrollTop=c.scrollHeight;
 }
 
 // ── GOLF CART FORM ────────────────────────────────────────────────
@@ -902,7 +883,6 @@ async function submitGolfForm(){
     ?`¡Perfecto! 🛺 Le mando la solicitud a Pilar ahora mismo.<br><br><strong>Resumen:</strong><br>• Carrito: ${size} pasajeros<br>• Fechas: ${fmt(from)} al ${fmt(to)}<br>• Días: ${days}<br>• Total estimado: USD ${total}<br><br>Pilar te va a enviar el link de pago por Airbnb en breve. ¡Cualquier cosa me avisás! 😊`
     :`Perfect! 🛺 I'm sending your request to Pilar right now.<br><br><strong>Summary:</strong><br>• Golf cart: ${size} passengers<br>• Dates: ${fmt(from)} to ${fmt(to)}<br>• Days: ${days}<br>• Estimated total: USD ${total}<br><br>Pilar will send you the payment link via Airbnb shortly. Let me know if you need anything! 😊`);
 
-  // Send via Google Script
   try {
     await fetch('/api/drive-upload', {
       method: 'POST',
@@ -912,6 +892,8 @@ async function submitGolfForm(){
         size: size,
         from: fmt(from),
         to: fmt(to),
+        fromRaw: from,
+        toRaw: to,
         days: days,
         total: total,
         photos: [],
@@ -968,10 +950,8 @@ async function submitOtherForm(){
   document.querySelectorAll('.card').forEach(c=>c.remove());
   addUser(msg);
   hist.push({role:'user', content:msg});
-
   addBot(lang==='es'?'Recibí tu consulta, se la reenvío a Pilar ahora mismo 🙏':'Got your question, forwarding it to Pilar right now 🙏');
 
-  // Send via Google Script
   try {
     await fetch('/api/drive-upload', {
       method: 'POST',

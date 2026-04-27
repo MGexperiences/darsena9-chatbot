@@ -385,10 +385,12 @@ async function fetchSheet(l) {
       return;
     }
 
-    const name     = data.guestName || '';
-    const checkin  = data.checkin   || '';
-    const checkout = data.checkout  || '';
-    const first    = name.split(' ')[0];
+    const name         = data.guestName    || '';
+    const checkin      = data.checkin      || '';
+    const checkout     = data.checkout     || '';
+    const integrantes  = data.integrantes  || '';
+    const codigoResort = data.codigoResort || '';
+    const first        = name.split(' ')[0];
 
     guestName        = name;
     reservationDates = { checkin: checkin, checkout: checkout };
@@ -400,13 +402,81 @@ async function fetchSheet(l) {
 
     setTimeout(() => {
       showReturningBanner(first, checkin, checkout);
-      hist.push({role:'assistant', content:`Guest from Sheet: ${name}. Check-in: ${checkin}, Check-out: ${checkout}`});
+      const hasDocs = integrantes  && integrantes  !== '—' && integrantes  !== '';
+      const hasCode = codigoResort && codigoResort !== '—' && codigoResort !== '';
+      if (hasCode) {
+        setTimeout(() => showResortCodeCard(first, codigoResort, checkin, checkout, l), 400);
+      } else if (hasDocs) {
+        setTimeout(() => showDocsSentCard(first, l), 400);
+      } else {
+        setTimeout(() => showAccessPromptCard(first, l), 400);
+      }
+      hist.push({role:'assistant', content:`Guest from Sheet: ${name}. Docs: ${hasDocs}. Code: ${hasCode}`});
     }, 300);
 
   } catch(err) {
     console.error('Sheet fetch error:', err);
     showNewGuestWelcome(l);
   }
+}
+
+// ── Opción B: pedir documentos ────────────────────────────────────
+function showAccessPromptCard(first, l) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card navy-border';
+  d.style.maxWidth = '95%';
+  d.innerHTML = l==='es'
+    ? `<div class="card-title">🔑 Acceso al resort</div>
+       <div class="card-sub">¡Hola <strong>${first}</strong>! Para coordinar tu acceso a Casa de Campo necesitamos los documentos de identidad de todos los integrantes.</div>
+       <div style="display:flex;gap:8px;margin-top:12px;">
+         <button onclick="startIDFlow();this.closest('.card').remove()" style="flex:1;background:var(--navy);color:var(--goldl);border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">✅ Sí, enviar documentos</button>
+         <button onclick="this.closest('.card').remove()" style="flex:1;background:var(--sand);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;">Después</button>
+       </div>`
+    : `<div class="card-title">🔑 Resort access</div>
+       <div class="card-sub">Hi <strong>${first}</strong>! To coordinate your Casa de Campo access we need the ID documents for all guests in your group.</div>
+       <div style="display:flex;gap:8px;margin-top:12px;">
+         <button onclick="startIDFlow();this.closest('.card').remove()" style="flex:1;background:var(--navy);color:var(--goldl);border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">✅ Yes, send documents</button>
+         <button onclick="this.closest('.card').remove()" style="flex:1;background:var(--sand);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;">Later</button>
+       </div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+// ── Opción C sin código: docs enviados, esperando código ──────────
+function showDocsSentCard(first, l) {
+  addBot(l==='es'
+    ? `¡Hola <strong>${first}</strong>! 👋 Ya recibimos tus documentos, gracias. Pilar está generando tu código de acceso al resort y te lo enviaremos pronto por Airbnb. ¿En qué más puedo ayudarte? 😊`
+    : `Hi <strong>${first}</strong>! 👋 We already received your documents, thank you. Pilar is generating your resort access code and will send it via Airbnb shortly. How else can I help? 😊`);
+}
+
+// ── Opción C con código: mostrar código de resort ─────────────────
+function showResortCodeCard(first, codigo, checkin, checkout, l) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card gold-border';
+  d.style.maxWidth = '95%';
+  d.innerHTML = l==='es'
+    ? `<div class="card-title">🏖 Tu código de acceso al resort</div>
+       <div class="card-sub">¡Hola <strong>${first}</strong>! Todo listo para tu estadía en Casa de Campo.</div>
+       <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:12px 0;">
+         <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">CÓDIGO DE ACCESO</div>
+         <div style="font-size:28px;font-weight:600;color:var(--goldl);letter-spacing:4px;">${codigo}</div>
+       </div>
+       <div class="card-row"><span>📅 Check-in</span><span class="card-val">${checkin}</span></div>
+       <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
+       <div class="card-note">🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código lockbox: <strong>0926</strong></div>`
+    : `<div class="card-title">🏖 Your resort access code</div>
+       <div class="card-sub">Hi <strong>${first}</strong>! Everything is ready for your stay at Casa de Campo.</div>
+       <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:12px 0;">
+         <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">ACCESS CODE</div>
+         <div style="font-size:28px;font-weight:600;color:var(--goldl);letter-spacing:4px;">${codigo}</div>
+       </div>
+       <div class="card-row"><span>📅 Check-in</span><span class="card-val">${checkin}</span></div>
+       <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
+       <div class="card-note">🔑 The lockbox is to the <strong>left of the main door</strong> · Lockbox code: <strong>0926</strong></div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
 }
 
 // ── Banner cuando encontramos fechas pero no nombre ───────────────

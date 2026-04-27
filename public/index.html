@@ -370,67 +370,41 @@ function setLang(l){
     document.getElementById('welcome-msg').innerHTML = l==='es'
       ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
       : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
-    fetchIcal(l);
+    fetchSheet(l);
   }
 }
 
-// ── Fetch iCal y detectar reserva activa/próxima ──────────────────
-async function fetchIcal(l) {
+// ── Fetch Sheet y detectar reserva activa ────────────────────────
+async function fetchSheet(l) {
   try {
-    const r = await fetch('/api/ical');
+    const r    = await fetch('/api/sheet');
     const data = await r.json();
 
-    if (!data.success) throw new Error(data.error);
-
-    const today = new Date().toISOString().split('T')[0];
-    const reservation = data.active || data.upcoming;
-
-    if (reservation && reservation.checkin && reservation.checkout) {
-      // Extraer nombre del huésped del iCal
-      // Airbnb usa SUMMARY para el nombre — puede ser "Nombre Apellido" o "Airbnb (reservado)"
-      const rawName = reservation.summary || '';
-      const isAnonymous = rawName.toLowerCase().includes('airbnb') ||
-                          rawName.toLowerCase().includes('reservado') ||
-                          rawName.toLowerCase().includes('reserved') ||
-                          rawName === '';
-
-      reservationDates = { checkin: reservation.checkin, checkout: reservation.checkout };
-
-      if (!isAnonymous) {
-        // Tenemos el nombre completo del huésped
-        guestName = rawName;
-        const first = rawName.split(' ')[0];
-        saveGuestToLS();
-
-        document.getElementById('welcome-msg').innerHTML = l==='es'
-          ? `¡Bienvenido al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
-          : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
-
-        setTimeout(() => {
-          showReturningBanner(first, reservation.checkin, reservation.checkout);
-          hist.push({role:'assistant', content:`Guest from iCal: ${guestName}. Check-in: ${reservation.checkin}, Check-out: ${reservation.checkout}`});
-        }, 300);
-
-      } else {
-        // iCal anónimo — tenemos fechas pero no nombre, mostramos banner de fechas
-        document.getElementById('welcome-msg').innerHTML = l==='es'
-          ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. ¡Cualquier consulta con gusto te ayudo! 😊`
-          : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. Happy to help with anything! 😊`;
-
-        setTimeout(() => {
-          showDatesFoundBanner(reservation.checkin, reservation.checkout, l);
-          hist.push({role:'assistant', content:`Reservation found in iCal (anonymous). Check-in: ${reservation.checkin}, Check-out: ${reservation.checkout}`});
-        }, 300);
-      }
-
-    } else {
-      // No hay reserva activa ni próxima en el iCal
+    if (!data.success || !data.found) {
       showNewGuestWelcome(l);
+      return;
     }
 
+    const name     = data.guestName || '';
+    const checkin  = data.checkin   || '';
+    const checkout = data.checkout  || '';
+    const first    = name.split(' ')[0];
+
+    guestName        = name;
+    reservationDates = { checkin: checkin, checkout: checkout };
+    saveGuestToLS();
+
+    document.getElementById('welcome-msg').innerHTML = l==='es'
+      ? `¡Bienvenido al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
+      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
+
+    setTimeout(() => {
+      showReturningBanner(first, checkin, checkout);
+      hist.push({role:'assistant', content:`Guest from Sheet: ${name}. Check-in: ${checkin}, Check-out: ${checkout}`});
+    }, 300);
+
   } catch(err) {
-    console.error('iCal fetch error:', err);
-    // Fallback: flujo normal de huésped nuevo
+    console.error('Sheet fetch error:', err);
     showNewGuestWelcome(l);
   }
 }
@@ -444,26 +418,13 @@ function showDatesFoundBanner(checkin, checkout, l) {
     <div class="rb-icon">📅</div>
     <div class="rb-body">
       <div class="rb-name">${l==='es'?'Encontré tu reserva:':'Found your reservation:'}</div>
-      <div class="rb-dates">${fmt(checkin)} → ${fmt(checkout)}</div>
+      <div class="rb-dates">${checkin} → ${checkout}</div>
     </div>
     <button class="rb-clear" onclick="handleClearGuest()" title="${l==='es'?'No es mía':'Not mine'}">
       ${l==='es'?'No es mía':'Not mine'}
     </button>`;
   c.appendChild(d);
   c.scrollTop = c.scrollHeight;
-
-  // Con las fechas ya conocidas, si toca Resort access solo pide nombre
-  addBot(l==='es'
-    ? `¡Hola! Ya tengo tus fechas (${fmt(checkin)} al ${fmt(checkout)}). Para coordinar el acceso al resort tocá 🔑 <strong>Acceso al resort</strong> — solo voy a pedirte tu nombre y los documentos 😊`
-    : `Hi! I already have your dates (${fmt(checkin)} to ${fmt(checkout)}). To coordinate resort access tap 🔑 <strong>Resort access</strong> — I'll only need your name and documents 😊`);
-}
-
-// ── Welcome para huésped nuevo sin reserva en iCal ───────────────
-function showNewGuestWelcome(l) {
-  document.getElementById('welcome-msg').innerHTML = l==='es'
-    ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br>Soy el asistente de Pilar. Para coordinar el ingreso al resort, tocá <strong>🔑 Acceso al resort</strong> y enviá tu documento de identidad. ¡Cualquier consulta con gusto te ayudo! 😊`
-    : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. To coordinate your resort access, tap <strong>🔑 Resort access</strong> and send your ID document. Happy to help with anything! 😊`;
-  hist.push({role:'assistant', content: l==='es' ? 'Huésped nuevo. Saludé y ofrecí ayuda.' : 'New guest. Greeted and offered help.'});
 }
 
 function showReturningBanner(first, checkin, checkout) {
@@ -529,7 +490,10 @@ PROPIEDAD — DÁRSENA 9:
 - Dorm 2: 2 camas queen, baño privado
 - Dorm 3: cama doble, baño privado
 - Check-in: 3:00 PM | Check-out: 11:00 AM (estricto si hay reservas consecutivas)
-- WiFi: "lacautiva" / "lacautiva 2" / "lacautiva 3" (la de mejor señal)
+- WiFi: Conectarse a TODAS las redes para tener cobertura en toda la casa:
+  · Darsena 9: lacautiva
+  · Darsena 9-2: lacautiva
+  · Darsena 9-3: lacautiva
 - Llaves: lockbox a la IZQUIERDA de la puerta principal. Código: 0926
 - BBQ: parrilla a gas en terraza — funciona perfecto
 - Limpieza: lun-vie 8-13h incluida. Fines de semana cargo adicional.

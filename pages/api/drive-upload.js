@@ -1,8 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzz3yaqNPRAJQvt7dohZPX91zcMasBvZ5ebNarsI0L8oPFmkWDXtGaR9ZPgcxhz0ApiNw/exec";
-
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9qjupSzJF8eCduOmZPYG5MVI9h5l8RxmRS6Qj61AYN1zeqIoZQEK5CzauoH8udUHD5w/exec";
   try {
     const response = await fetch(SCRIPT_URL, {
       method: "POST",

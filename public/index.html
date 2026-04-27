@@ -309,8 +309,8 @@ document.getElementById('welcome-msg').innerHTML =
   `<span style="font-size:15px;font-weight:500;color:var(--navy)">¡Hola! 👋  Hello!</span><br>
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
   <div style="display:flex;gap:10px;margin-top:12px;">
-    <button onclick="setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
-    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
+    <button onclick="window.langSelected=true;setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
+    <button onclick="window.langSelected=true;setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
   </div>`;
 
 hist.push({role:'assistant', content:'Greeted guest and showed language selector.'});
@@ -352,11 +352,14 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('What is the Casa de Campo resort fee?')">🏖 Resort fee</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
-  // ── Sheet siempre tiene prioridad — localStorage es fallback ────
-  document.getElementById('welcome-msg').innerHTML = l==='es'
-    ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
-    : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
-  fetchSheet(l);
+  // ── Solo consultar Sheet si el usuario eligió idioma explícitamente ─
+  // (no al cargar la página con setLang('en') automático)
+  if (window.langSelected) {
+    document.getElementById('welcome-msg').innerHTML = l==='es'
+      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
+      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
+    fetchSheet(l);
+  }
 }
 
 // ── Fetch Sheet y detectar reserva activa ────────────────────────
@@ -522,8 +525,8 @@ document.getElementById('welcome-msg').innerHTML =
   `<span style="font-size:15px;font-weight:500;color:var(--navy)">¡Hola! 👋  Hello!</span><br>
   <span style="font-size:13px;color:var(--muted)">Choose your language · Elegí tu idioma</span>
   <div style="display:flex;gap:10px;margin-top:12px;">
-    <button onclick="setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
-    <button onclick="setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
+    <button onclick="window.langSelected=true;setLang('en')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇺🇸 English</button>
+    <button onclick="window.langSelected=true;setLang('es')" style="flex:1;padding:13px;background:var(--navy);color:var(--goldl);border:none;border-radius:12px;font-family:'Jost',sans-serif;font-size:15px;cursor:pointer;font-weight:500;letter-spacing:.3px;">🇩🇴 Español</button>
   </div>`;
 
 // ── System prompt ─────────────────────────────────────────────────

@@ -340,6 +340,7 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('¿Qué restaurantes hay en La Marina?')">🍽 Restaurantes</button>
        <button class="qbtn" onclick="showSupermarket()">🛒 Supermercado</button>
        <button class="qbtn" onclick="askMsg('¿Cuánto es la tarifa del resort Casa de Campo?')">🏖 Tarifa resort</button>
+       <button class="qbtn" onclick="showCheckinCard()">🏠 Cómo llegar</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Otras consultas</button>`
     : `<button class="qbtn" onclick="startIDFlow()">🔑 Resort access</button>
        <button class="qbtn" onclick="askMsg('What is the WiFi name and password?')">📶 WiFi</button>
@@ -350,6 +351,7 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('What restaurants are at the Marina?')">🍽 Restaurants</button>
        <button class="qbtn" onclick="showSupermarket()">🛒 Supermarket</button>
        <button class="qbtn" onclick="askMsg('What is the Casa de Campo resort fee?')">🏖 Resort fee</button>
+       <button class="qbtn" onclick="showCheckinCard()">🏠 How to arrive</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
   // ── Solo consultar Sheet si el usuario eligió idioma explícitamente ─
@@ -394,7 +396,7 @@ async function fetchSheet(l) {
     const hasCode = codigoResort && codigoResort !== '—' && codigoResort !== '';
     setTimeout(() => {
       if (hasCode) {
-        showResortCodeCard(first, codigoResort, checkin, checkout, l);
+        showResortCodeCard(first, codigoResort, checkin, checkout, l, integrantes);
       } else if (hasDocs) {
         showDocsSentCard(first, l);
       } else {
@@ -442,14 +444,26 @@ function showDocsSentCard(first, l) {
     : `Hi <strong>${first}</strong>! 👋 We already received your documents, thank you. Pilar is generating your resort access code and will send it via Airbnb shortly. How else can I help? 😊`);
 }
 
-// ── Opción C con código: mostrar código de resort ─────────────────
-function showResortCodeCard(first, codigo, checkin, checkout, l) {
+// ── Opción C con código: mostrar código de resort + integrantes ───
+function showResortCodeCard(first, codigo, checkin, checkout, l, integrantes) {
   const c = document.getElementById('chat');
   const d = document.createElement('div');
   d.className = 'card gold-border';
   d.style.maxWidth = '95%';
+
+  // Formatear lista de integrantes
+  const hasGuests = integrantes && integrantes !== '—' && integrantes !== '';
+  const guestListHTML = hasGuests
+    ? `<div style="margin:12px 0 4px;">
+         <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">
+           ${l==='es'?'👥 Integrantes registrados':'👥 Registered guests'}
+         </div>
+         <div style="font-size:13px;color:var(--text);line-height:1.8;white-space:pre-line;">${integrantes}</div>
+       </div>`
+    : '';
+
   d.innerHTML = l==='es'
-    ? `<div class="card-title">🏖 Tu código de acceso al resort</div>
+    ? `<div class="card-title">🏖 Código de acceso al resort</div>
        <div class="card-sub">¡Hola <strong>${first}</strong>! Todo listo para tu estadía en Casa de Campo.</div>
        <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:12px 0;">
          <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">CÓDIGO DE ACCESO</div>
@@ -457,8 +471,12 @@ function showResortCodeCard(first, codigo, checkin, checkout, l) {
        </div>
        <div class="card-row"><span>📅 Check-in</span><span class="card-val">${checkin}</span></div>
        <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
-       <div class="card-note">🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código lockbox: <strong>0926</strong></div>`
-    : `<div class="card-title">🏖 Your resort access code</div>
+       ${guestListHTML}
+       <div class="card-note" style="margin-top:10px;">🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código lockbox: <strong>0926</strong></div>
+       <button onclick="showAddGuestsForm()" style="margin-top:12px;width:100%;background:transparent;border:1px dashed var(--border);border-radius:10px;padding:9px;font-family:'Jost',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;">
+         + Agregar más integrantes
+       </button>`
+    : `<div class="card-title">🏖 Resort access code</div>
        <div class="card-sub">Hi <strong>${first}</strong>! Everything is ready for your stay at Casa de Campo.</div>
        <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:12px 0;">
          <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">ACCESS CODE</div>
@@ -466,9 +484,99 @@ function showResortCodeCard(first, codigo, checkin, checkout, l) {
        </div>
        <div class="card-row"><span>📅 Check-in</span><span class="card-val">${checkin}</span></div>
        <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
-       <div class="card-note">🔑 The lockbox is to the <strong>left of the main door</strong> · Lockbox code: <strong>0926</strong></div>`;
+       ${guestListHTML}
+       <div class="card-note" style="margin-top:10px;">🔑 The lockbox is to the <strong>left of the main door</strong> · Lockbox code: <strong>0926</strong></div>
+       <button onclick="showAddGuestsForm()" style="margin-top:12px;width:100%;background:transparent;border:1px dashed var(--border);border-radius:10px;padding:9px;font-family:'Jost',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;">
+         + Add more guests
+       </button>`;
   c.appendChild(d);
   c.scrollTop = c.scrollHeight;
+}
+
+// ── Formulario para agregar más integrantes ────────────────────────
+function showAddGuestsForm() {
+  // Remover cards anteriores de agregar
+  document.querySelectorAll('.add-guests-card').forEach(el => el.remove());
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card navy-border add-guests-card';
+  d.style.maxWidth = '95%';
+  d.innerHTML = `
+    <div class="card-title">🛂 ${lang==='es'?'Agregar integrantes':'Add guests'}</div>
+    <div class="card-sub">${lang==='es'?'Ingresá los datos de los integrantes adicionales.':'Enter the details of the additional guests.'}</div>
+    <div class="guest-list" id="add-guest-list">
+      <div class="guest-row" id="add-grow-1">
+        <span class="gnum">1.</span>
+        <input class="id-input" placeholder="${lang==='es'?'Nombre completo':'Full name'}" id="add-gname-1" style="flex:1.4">
+        <input class="id-input" placeholder="${lang==='es'?'N° pasaporte/doc':'Passport/ID number'}" id="add-gdoc-1" style="flex:1">
+      </div>
+    </div>
+    <button class="add-btn" onclick="addExtraGuestRow()">+ ${lang==='es'?'Agregar otro':'Add another'}</button>
+    <button class="submit-btn" onclick="submitExtraGuests()">${lang==='es'?'Enviar →':'Send →'}</button>
+  `;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+let extraGuestCount = 1;
+
+function addExtraGuestRow() {
+  extraGuestCount++;
+  const list = document.getElementById('add-guest-list');
+  const r = document.createElement('div');
+  r.className = 'guest-row';
+  r.innerHTML = `
+    <span class="gnum">${extraGuestCount}.</span>
+    <input class="id-input" placeholder="${lang==='es'?'Nombre completo':'Full name'}" id="add-gname-${extraGuestCount}" style="flex:1.4">
+    <input class="id-input" placeholder="${lang==='es'?'N° pasaporte/doc':'Passport/ID number'}" id="add-gdoc-${extraGuestCount}" style="flex:1">
+    <button class="del-btn" onclick="this.closest('.guest-row').remove()">×</button>`;
+  list.appendChild(r);
+}
+
+async function submitExtraGuests() {
+  let guests = [], incomplete = false;
+  document.querySelectorAll('#add-guest-list .guest-row').forEach((row, idx) => {
+    const n   = (row.querySelector('[id^=add-gname]')?.value || '').trim();
+    const doc = (row.querySelector('[id^=add-gdoc]')?.value  || '').trim();
+    if (n || doc) {
+      if (!n || !doc) { incomplete = true; }
+      else guests.push(`${idx+1}. ${n} — ${doc}`);
+    }
+  });
+  if (!guests.length) { alert(lang==='es'?'Ingresá al menos un integrante.':'Please enter at least one guest.'); return; }
+  if (incomplete) { alert(lang==='es'?'Completá nombre y documento para cada persona.':'Please complete name and document for each person.'); return; }
+
+  document.querySelectorAll('.add-guests-card').forEach(el => el.remove());
+  const listTxt = guests.join('
+');
+  addUser(lang==='es'?`Integrantes adicionales:
+${listTxt}`:`Additional guests:
+${listTxt}`);
+  hist.push({role:'user', content:`Additional guests: ${listTxt}`});
+
+  addBot(lang==='es'
+    ?'¡Gracias! Le aviso a Pilar para actualizar el acceso al resort con los nuevos integrantes 🙏'
+    :'Thank you! I'll notify Pilar to update the resort access with the new guests 🙏');
+
+  try {
+    await fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        type: 'guests',
+        guestName: guestName || 'Guest',
+        guests: listTxt,
+        checkin: fmt(reservationDates.checkin) || reservationDates.checkin,
+        checkout: fmt(reservationDates.checkout) || reservationDates.checkout,
+        checkinRaw: reservationDates.checkin,
+        checkoutRaw: reservationDates.checkout,
+        photos: [],
+        folderId: FOLDER_ID
+      })
+    });
+  } catch(e) { console.error('Extra guests error:', e); }
+
+  hist.push({role:'assistant', content:`Additional guests sent to Pilar: ${listTxt}`});
 }
 
 // ── Banner cuando encontramos fechas pero no nombre ───────────────
@@ -1057,6 +1165,85 @@ async function submitGolfForm(){
 
   addWACard('',`<strong>${lang==='es'?'✅ Solicitud enviada a Pilar':'✅ Request sent to Pilar'}</strong>${lang==='es'?'<br>Te enviará el link de pago por Airbnb.':'<br>She\'ll send you the payment link via Airbnb.'}`);
   hist.push({role:'assistant', content:`Golf cart ${size}pax requested for ${days} days. Pilar notified.`});
+}
+
+// ── CHECK-IN / CÓMO LLEGAR ───────────────────────────────────────
+function showCheckinCard() {
+  addUser(lang==='es'?'¿Cómo llego a la propiedad?':'How do I get to the property?');
+  hist.push({role:'user', content:'Asked for check-in / arrival instructions.'});
+
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card gold-border';
+  d.style.maxWidth = '95%';
+  d.innerHTML = lang==='es'
+    ? `<div class="card-title">🏠 Cómo llegar y acceder</div>
+       <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
+
+       <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
+         📍 Ver ubicación en Google Maps
+       </a>
+
+       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Instrucciones de acceso</div>
+       <div style="font-size:13px;color:var(--text);line-height:1.7;">
+         1. Al llegar a la entrada de <strong>Casa de Campo</strong>, decí que vas al <strong>Townhouse Marina · Dársena 9</strong> en <strong>La Marina</strong><br><br>
+         2. En la garita te van a pedir el código de acceso al resort — usá el código que Pilar te envió por Airbnb<br><br>
+         3. Una vez dentro, seguí las indicaciones hacia <strong>La Marina / Dársena 9</strong><br><br>
+         4. Al llegar a la propiedad, el portallaves está a la <strong>izquierda de la puerta principal</strong>
+       </div>
+
+       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">🔑 Acceso a la villa</div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+         <div>
+           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Portallaves</div>
+           <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
+                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
+                onerror="this.style.display='none'">
+         </div>
+         <div>
+           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Puerta principal</div>
+           <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
+                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
+                onerror="this.style.display='none'">
+         </div>
+       </div>
+       <div class="card-note">🔢 Código del portallaves: <strong>0926</strong> · Check-in a partir de las <strong>3:00 PM</strong></div>`
+
+    : `<div class="card-title">🏠 How to get there</div>
+       <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
+
+       <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
+         📍 Open in Google Maps
+       </a>
+
+       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Access instructions</div>
+       <div style="font-size:13px;color:var(--text);line-height:1.7;">
+         1. When you arrive at the <strong>Casa de Campo</strong> entrance, tell them you're going to <strong>Townhouse Marina · Dársena 9</strong> at <strong>La Marina</strong><br><br>
+         2. At the gate they'll ask for your resort access code — use the code Pilar sent you via Airbnb<br><br>
+         3. Once inside, follow the signs toward <strong>La Marina / Dársena 9</strong><br><br>
+         4. When you arrive at the property, the lockbox is to the <strong>left of the main door</strong>
+       </div>
+
+       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">🔑 Villa access</div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+         <div>
+           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Lockbox</div>
+           <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
+                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
+                onerror="this.style.display='none'">
+         </div>
+         <div>
+           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Main door</div>
+           <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
+                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
+                onerror="this.style.display='none'">
+         </div>
+       </div>
+       <div class="card-note">🔢 Lockbox code: <strong>0926</strong> · Check-in from <strong>3:00 PM</strong></div>`;
+
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+  hist.push({role:'assistant', content:'Showed check-in / arrival card with map, instructions and lockbox photos.'});
 }
 
 // ── SUPERMARKET ───────────────────────────────────────────────────

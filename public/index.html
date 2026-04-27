@@ -352,26 +352,11 @@ function setLang(l){
        <button class="qbtn" onclick="askMsg('What is the Casa de Campo resort fee?')">🏖 Resort fee</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
-  // ── Primero intentar localStorage, luego iCal ──────────────────
-  const saved = loadGuestFromLS();
-
-  if (saved) {
-    // Huésped conocido por localStorage
-    guestName = saved.name;
-    reservationDates = { checkin: saved.checkin, checkout: saved.checkout };
-    const first = saved.name.split(' ')[0];
-    document.getElementById('welcome-msg').innerHTML = l==='es'
-      ? `¡Bienvenido de nuevo al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
-      : `Welcome back to <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
-    setTimeout(() => showReturningBanner(first, saved.checkin, saved.checkout), 300);
-    hist.push({role:'assistant', content:`Returning guest from localStorage: ${saved.name}.`});
-  } else {
-    // Intentar leer del iCal de Airbnb
-    document.getElementById('welcome-msg').innerHTML = l==='es'
-      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
-      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
-    fetchSheet(l);
-  }
+  // ── Sheet siempre tiene prioridad — localStorage es fallback ────
+  document.getElementById('welcome-msg').innerHTML = l==='es'
+    ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
+    : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
+  fetchSheet(l);
 }
 
 // ── Fetch Sheet y detectar reserva activa ────────────────────────
@@ -416,7 +401,19 @@ async function fetchSheet(l) {
 
   } catch(err) {
     console.error('Sheet fetch error:', err);
-    showNewGuestWelcome(l);
+    // Fallback: intentar localStorage si el Sheet falla
+    const saved = loadGuestFromLS();
+    if (saved) {
+      guestName = saved.name;
+      reservationDates = { checkin: saved.checkin, checkout: saved.checkout };
+      const first = saved.name.split(' ')[0];
+      document.getElementById('welcome-msg').innerHTML = l==='es'
+        ? `¡Bienvenido de nuevo al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
+        : `Welcome back to <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
+      setTimeout(() => showReturningBanner(first, saved.checkin, saved.checkout), 300);
+    } else {
+      showNewGuestWelcome(l);
+    }
   }
 }
 

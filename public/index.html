@@ -379,41 +379,33 @@ async function fetchSheet(l) {
 
     guestName        = name;
     reservationDates = { checkin: checkin, checkout: checkout };
+    // Actualizar localStorage con datos del Sheet (fuente de verdad)
     saveGuestToLS();
 
     document.getElementById('welcome-msg').innerHTML = l==='es'
       ? `¡Bienvenido al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
       : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
 
+    // Mostrar UN solo elemento según el estado
+    const hasDocs = integrantes  && integrantes  !== '—' && integrantes  !== '';
+    const hasCode = codigoResort && codigoResort !== '—' && codigoResort !== '';
     setTimeout(() => {
-      showReturningBanner(first, checkin, checkout);
-      const hasDocs = integrantes  && integrantes  !== '—' && integrantes  !== '';
-      const hasCode = codigoResort && codigoResort !== '—' && codigoResort !== '';
       if (hasCode) {
-        setTimeout(() => showResortCodeCard(first, codigoResort, checkin, checkout, l), 400);
+        showResortCodeCard(first, codigoResort, checkin, checkout, l);
       } else if (hasDocs) {
-        setTimeout(() => showDocsSentCard(first, l), 400);
+        showDocsSentCard(first, l);
       } else {
-        setTimeout(() => showAccessPromptCard(first, l), 400);
+        // Mostrar banner + card de acceso
+        showReturningBanner(first, checkin, checkout);
+        setTimeout(() => showAccessPromptCard(first, l), 300);
       }
       hist.push({role:'assistant', content:`Guest from Sheet: ${name}. Docs: ${hasDocs}. Code: ${hasCode}`});
     }, 300);
 
   } catch(err) {
     console.error('Sheet fetch error:', err);
-    // Fallback: intentar localStorage si el Sheet falla
-    const saved = loadGuestFromLS();
-    if (saved) {
-      guestName = saved.name;
-      reservationDates = { checkin: saved.checkin, checkout: saved.checkout };
-      const first = saved.name.split(' ')[0];
-      document.getElementById('welcome-msg').innerHTML = l==='es'
-        ? `¡Bienvenido de nuevo al <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>Soy el asistente de Pilar. ¿En qué puedo ayudarte?`
-        : `Welcome back to <strong>Townhouse Marina · Dársena 9</strong> 🌴<br><br>I'm Pilar's assistant. How can I help you?`;
-      setTimeout(() => showReturningBanner(first, saved.checkin, saved.checkout), 300);
-    } else {
-      showNewGuestWelcome(l);
-    }
+    // Si el Sheet falla, mostrar bienvenida genérica
+    showNewGuestWelcome(l);
   }
 }
 
@@ -498,11 +490,12 @@ function showReturningBanner(first, checkin, checkout) {
   const c = document.getElementById('chat');
   const d = document.createElement('div');
   d.className = 'return-banner';
+  // checkin/checkout ya vienen como "18 abr 2026" — mostrar directo
   d.innerHTML = `
     <div class="rb-icon">👋</div>
     <div class="rb-body">
       <div class="rb-name">${lang==='es'?'¡Hola de nuevo, ':'Welcome back, '}${first}!</div>
-      <div class="rb-dates">📅 ${fmt(checkin)} → ${fmt(checkout)}</div>
+      <div class="rb-dates">📅 ${checkin} → ${checkout}</div>
     </div>
     <button class="rb-clear" onclick="handleClearGuest()" title="${lang==='es'?'No soy yo':'Not me'}">
       ${lang==='es'?'No soy yo':'Not me'}

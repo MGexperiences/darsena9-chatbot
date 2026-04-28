@@ -731,7 +731,12 @@ REGLAS IMPORTANTES:
 4. SIEMPRE que el huésped mencione fechas, check-in, llegada, acceso al resort o documentos — respondé MUY brevemente (1 sola oración) y decile que toque el botón 🔑 "Acceso al resort". NO hagas preguntas adicionales.
 5. SIEMPRE que menciones temas de acceso o ingreso al resort, recordá la tarifa: USD 30/adulto/noche, USD 15/niño (4-12 años)/noche, menores de 4 gratis. Se cobra al ingreso.
 6. NUNCA respondas con tablas markdown. Usá texto simple con saltos de línea.
-7. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
+7. IMPORTANTE sobre cards visuales: la app muestra automáticamente cards visuales cuando mencionás ciertos temas. Cuando respondas sobre estos temas, terminá tu respuesta invitando al huésped a usar el card que va a aparecer:
+   - Carrito de golf → terminá con algo como "¡Podés reservarlo directamente acá abajo! 🛺"
+   - Supermercado → terminá con "Te muestro los horarios y ubicación abajo 🛒"
+   - Cómo llegar → terminá con "Abajo encontrás el mapa y las instrucciones detalladas 📍"
+   - Código de acceso → terminá con "Tu código aparece arriba en el botón 🔑 Acceso al resort"
+8. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
 {"escalate":true,"summary":"descripción breve en máximo 20 palabras"}`;}
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -887,22 +892,22 @@ async function callAI(){
         }
       }
 
-      // Cómo llegar / ubicación
-      const locationKeywords = ['cómo llegar','como llegar','dársena 9','darsena 9','la marina','maps','google maps','how to get','directions','ubicación','ubicacion','location','lockbox','portallaves','puerta principal','main door'];
+      // Cómo llegar / ubicación — solo si menciona instrucciones de llegada
+      const locationKeywords = ['cómo llegar','como llegar','how to get there','how to arrive','google maps','maps.app','portallaves','lockbox','puerta principal','main door','garita','gate','entrada de casa de campo'];
       if(locationKeywords.some(k => rawLower.includes(k))){
-        setTimeout(() => showCheckinCard(), 300);
+        setTimeout(() => showCheckinCard(), 800);
       }
 
       // Supermercado
-      const superKeywords = ['supermercado','supermarket','nacional','butcher shop'];
+      const superKeywords = ['supermercado nacional','supermarket','butcher shop'];
       if(superKeywords.some(k => rawLower.includes(k))){
-        setTimeout(() => showSupermarket(), 300);
+        setTimeout(() => showSupermarket(), 800);
       }
 
-      // Carrito de golf
-      const golfKeywords = ['carrito de golf','golf cart','70/día','100/día','70/day','100/day'];
+      // Carrito de golf — cuando recomienda moverse en carrito
+      const golfKeywords = ['carrito de golf','golf cart','reservar el carrito','book the cart','alquilar','rent a cart','moverse en carrito','70/día','100/día','usd 70','usd 100'];
       if(golfKeywords.some(k => rawLower.includes(k))){
-        setTimeout(() => showGolfForm(), 300);
+        setTimeout(() => showGolfForm(), 800);
       }
     }
   } catch(e){

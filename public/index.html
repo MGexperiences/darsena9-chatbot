@@ -475,6 +475,14 @@ function showResortCodeCard(first, codigo, checkin, checkout, l, integrantes) {
        <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
        ${guestListHTML}
        <div class="card-note" style="margin-top:10px;">🔑 El portallaves está a la <strong>izquierda de la puerta principal</strong> · Código lockbox: <strong>0926</strong></div>
+       <div style="background:#fdf8ee;border:1px solid #e8d99a;border-radius:10px;padding:12px;margin-top:10px;">
+         <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">💵 Tarifa resort (se cobra al ingreso)</div>
+         <div style="font-size:13px;color:var(--text);line-height:1.7;">
+           👤 USD 30 / adulto / noche<br>
+           👧 USD 15 / niño 4-12 años / noche<br>
+           🍼 Menores de 4 años: gratis
+         </div>
+       </div>
        <button onclick="showAddGuestsForm()" style="margin-top:12px;width:100%;background:transparent;border:1px dashed var(--border);border-radius:10px;padding:9px;font-family:'Jost',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;">
          + Agregar más integrantes
        </button>`
@@ -488,6 +496,14 @@ function showResortCodeCard(first, codigo, checkin, checkout, l, integrantes) {
        <div class="card-row"><span>📅 Check-out</span><span class="card-val">${checkout}</span></div>
        ${guestListHTML}
        <div class="card-note" style="margin-top:10px;">🔑 The lockbox is to the <strong>left of the main door</strong> · Lockbox code: <strong>0926</strong></div>
+       <div style="background:#fdf8ee;border:1px solid #e8d99a;border-radius:10px;padding:12px;margin-top:10px;">
+         <div style="font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">💵 Resort fee (charged at arrival)</div>
+         <div style="font-size:13px;color:var(--text);line-height:1.7;">
+           👤 USD 30 / adult / night<br>
+           👧 USD 15 / child 4-12 yrs / night<br>
+           🍼 Under 4 years: free
+         </div>
+       </div>
        <button onclick="showAddGuestsForm()" style="margin-top:12px;width:100%;background:transparent;border:1px dashed var(--border);border-radius:10px;padding:9px;font-family:'Jost',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;">
          + Add more guests
        </button>`;

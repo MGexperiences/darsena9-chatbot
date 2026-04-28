@@ -1391,93 +1391,105 @@ function showCheckinCard() {
   addUser(lang==='es'?'¿Cómo llego a la propiedad?':'How do I get to the property?');
   hist.push({role:'user', content:'Asked for check-in / arrival instructions.'});
 
-  // Verificar si tiene reserva verificada
-  const hasVerifiedReservation = guestName && guestName !== '' && reservationDates.checkin;
-
+  const verified = guestName && guestName !== '' && reservationDates.checkin;
   const c = document.getElementById('chat');
+
+  // Card de mapa y instrucciones generales — siempre visible
   const d = document.createElement('div');
   d.className = 'card gold-border';
   d.style.maxWidth = '95%';
 
-  // Sección del lockbox — solo para huéspedes verificados
-  const lockboxES = hasVerifiedReservation
-    ? `<div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">🔑 Acceso a la villa</div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-         <div>
-           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Portallaves</div>
-           <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
-                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
-                onerror="this.style.display='none'">
-         </div>
-         <div>
-           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Puerta principal</div>
-           <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
-                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
-                onerror="this.style.display='none'">
-         </div>
-       </div>
-       <div class="card-note">🔢 Código del portallaves: <strong>0926</strong> · Check-in a partir de las <strong>3:00 PM</strong></div>`
-    : `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px;margin-top:10px;">
-         <div style="font-size:13px;color:#856404;">🔒 El acceso a la villa y el código del portallaves están disponibles solo para huéspedes con reserva confirmada. Ingresá tu código de confirmación de Airbnb para acceder.</div>
-       </div>`;
+  const instrES = `<div class="card-title">🏠 Cómo llegar y acceder</div>
+     <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
+     <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
+       📍 Ver ubicación en Google Maps
+     </a>
+     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Instrucciones de acceso</div>
+     <div style="font-size:13px;color:var(--text);line-height:1.7;">
+       1. Al llegar a la entrada de <strong>Casa de Campo</strong>, decí que vas al <strong>Townhouse Marina · Dársena 9</strong> en <strong>La Marina</strong><br><br>
+       2. En la garita te van a pedir el código de acceso al resort — usá el código que aparece en esta app (sección 🔑 Acceso al resort)<br><br>
+       3. Una vez dentro, seguí las indicaciones hacia <strong>La Marina / Dársena 9</strong><br><br>
+       4. Al llegar a la propiedad, el portallaves está a la <strong>izquierda de la puerta principal</strong>
+     </div>`;
 
-  const lockboxEN = hasVerifiedReservation
-    ? `<div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">🔑 Villa access</div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-         <div>
-           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Lockbox</div>
-           <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
-                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
-                onerror="this.style.display='none'">
-         </div>
-         <div>
-           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Main door</div>
-           <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
-                style="width:100%;border-radius:10px;object-fit:cover;height:130px;"
-                onerror="this.style.display='none'">
-         </div>
-       </div>
-       <div class="card-note">🔢 Lockbox code: <strong>0926</strong> · Check-in from <strong>3:00 PM</strong></div>`
-    : `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px;margin-top:10px;">
-         <div style="font-size:13px;color:#856404;">🔒 Villa access details and lockbox code are only available to guests with a confirmed reservation. Please enter your Airbnb confirmation code to access this information.</div>
-       </div>`;
+  const instrEN = `<div class="card-title">🏠 How to get there</div>
+     <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
+     <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
+       📍 Open in Google Maps
+     </a>
+     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Access instructions</div>
+     <div style="font-size:13px;color:var(--text);line-height:1.7;">
+       1. When you arrive at the <strong>Casa de Campo</strong> entrance, tell them you're going to <strong>Townhouse Marina · Dársena 9</strong> at <strong>La Marina</strong><br><br>
+       2. At the gate they'll ask for your resort access code — use the code shown in this app (🔑 Resort access section)<br><br>
+       3. Once inside, follow the signs toward <strong>La Marina / Dársena 9</strong><br><br>
+       4. When you arrive at the property, the lockbox is to the <strong>left of the main door</strong>
+     </div>`;
 
-  d.innerHTML = lang==='es'
-    ? `<div class="card-title">🏠 Cómo llegar y acceder</div>
-       <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
-
-       <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
-         📍 Ver ubicación en Google Maps
-       </a>
-
-       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Instrucciones de acceso</div>
-       <div style="font-size:13px;color:var(--text);line-height:1.7;">
-         1. Al llegar a la entrada de <strong>Casa de Campo</strong>, decí que vas al <strong>Townhouse Marina · Dársena 9</strong> en <strong>La Marina</strong><br><br>
-         2. En la garita te van a pedir el código de acceso al resort — usá el código que aparece en esta app (sección 🔑 Acceso al resort)<br><br>
-         3. Una vez dentro, seguí las indicaciones hacia <strong>La Marina / Dársena 9</strong><br><br>
-         4. Al llegar a la propiedad, el portallaves está a la <strong>izquierda de la puerta principal</strong>
-       </div>
-       \${lockboxES}`
-
-    : `<div class="card-title">🏠 How to get there</div>
-       <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
-
-       <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
-         📍 Open in Google Maps
-       </a>
-
-       <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Access instructions</div>
-       <div style="font-size:13px;color:var(--text);line-height:1.7;">
-         1. When you arrive at the <strong>Casa de Campo</strong> entrance, tell them you're going to <strong>Townhouse Marina · Dársena 9</strong> at <strong>La Marina</strong><br><br>
-         2. At the gate they'll ask for your resort access code — use the code shown in this app (🔑 Resort access section)<br><br>
-         3. Once inside, follow the signs toward <strong>La Marina / Dársena 9</strong><br><br>
-         4. When you arrive at the property, the lockbox is to the <strong>left of the main door</strong>
-       </div>
-       \${lockboxEN}`;
-
+  d.innerHTML = lang==='es' ? instrES : instrEN;
   c.appendChild(d);
   c.scrollTop = c.scrollHeight;
-  hist.push({role:'assistant', content:'Showed check-in / arrival card with map, instructions and lockbox photos.'});
+
+  // Card de acceso físico — SOLO para huéspedes verificados
+  setTimeout(() => {
+    if (verified) {
+      // Mostrar lockbox y código
+      const d2 = document.createElement('div');
+      d2.className = 'card gold-border';
+      d2.style.maxWidth = '95%';
+      d2.innerHTML = lang==='es'
+        ? `<div class="card-title">🔑 Acceso a la villa</div>
+           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+             <div>
+               <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Portallaves</div>
+               <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
+                    style="width:100%;border-radius:10px;object-fit:cover;height:130px;" onerror="this.style.display='none'">
+             </div>
+             <div>
+               <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Puerta principal</div>
+               <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
+                    style="width:100%;border-radius:10px;object-fit:cover;height:130px;" onerror="this.style.display='none'">
+             </div>
+           </div>
+           <div class="card-note">🔢 Código del portallaves: <strong>0926</strong> · Check-in a partir de las <strong>3:00 PM</strong></div>`
+        : `<div class="card-title">🔑 Villa access</div>
+           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+             <div>
+               <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Lockbox</div>
+               <img src="https://drive.google.com/thumbnail?id=1VuXMrq0aFq6nKOWawYlgMrKtIjg_O_fF&sz=w400"
+                    style="width:100%;border-radius:10px;object-fit:cover;height:130px;" onerror="this.style.display='none'">
+             </div>
+             <div>
+               <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Main door</div>
+               <img src="https://drive.google.com/thumbnail?id=19gAxOLyaHtXx_8AwoQP7etBt3ip-mzRF&sz=w400"
+                    style="width:100%;border-radius:10px;object-fit:cover;height:130px;" onerror="this.style.display='none'">
+             </div>
+           </div>
+           <div class="card-note">🔢 Lockbox code: <strong>0926</strong> · Check-in from <strong>3:00 PM</strong></div>`;
+      c.appendChild(d2);
+    } else {
+      // Sin reserva verificada — mostrar aviso de seguridad
+      const d2 = document.createElement('div');
+      d2.className = 'card';
+      d2.style.maxWidth = '95%';
+      d2.style.background = '#fff3cd';
+      d2.style.border = '1px solid #ffc107';
+      d2.innerHTML = lang==='es'
+        ? `<div style="font-size:13px;color:#856404;">
+             🔒 <strong>Acceso restringido</strong><br><br>
+             El código del portallaves y las fotos de acceso están disponibles solo para huéspedes con reserva verificada.<br><br>
+             Para acceder, volvé al inicio e ingresá tu <strong>código de confirmación de Airbnb</strong>.
+           </div>`
+        : `<div style="font-size:13px;color:#856404;">
+             🔒 <strong>Restricted access</strong><br><br>
+             The lockbox code and access photos are only available to guests with a verified reservation.<br><br>
+             To access, go back and enter your <strong>Airbnb confirmation code</strong>.
+           </div>`;
+      c.appendChild(d2);
+    }
+    c.scrollTop = c.scrollHeight;
+  }, 400);
+
+  hist.push({role:'assistant', content:'Showed check-in card. Verified: ' + verified});
 }
 
 // ── SUPERMARKET ───────────────────────────────────────────────────

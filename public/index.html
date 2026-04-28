@@ -384,8 +384,9 @@ async function fetchSheet(l) {
 
     guestName        = name;
     reservationDates = { checkin: checkin, checkout: checkout };
-    // Guardar código de resort globalmente para usar en startIDFlow
-    window.currentCodigoResort = codigoResort;
+    // Guardar código y integrantes globalmente
+    window.currentCodigoResort  = codigoResort;
+    window.currentIntegrantes   = integrantes;
     // Actualizar localStorage con datos del Sheet (fuente de verdad)
     saveGuestToLS();
 
@@ -724,12 +725,13 @@ ACTIVIDADES EN CASA DE CAMPO:
 - Dress code cenas: smart casual / elegant resort. No traje de baño en restaurantes.
 
 REGLAS IMPORTANTES:
-1. NUNCA inventés el código de acceso al resort.
+1. NUNCA inventés ni adivines el código de acceso al resort. Si el huésped pregunta por el código, decile SOLAMENTE: "Tu código de acceso está disponible tocando el botón 🔑 Acceso al resort". JAMÁS escribas un código en el texto.
 2. Pagos adicionales SOLO por Airbnb.
 3. Late check-out: solo yo puedo aprobarlo — no lo prometás.
-4. SIEMPRE que el huésped mencione fechas, check-in, llegada, acceso al resort o documentos — respondé MUY brevemente (1 sola oración) y decile que toque el botón 🔑 "Acceso al resort" para iniciar el proceso. NO hagas preguntas adicionales ni pidas más datos — el formulario se encarga de todo.
-5. SIEMPRE que menciones el código de acceso al resort o cualquier tema de acceso/ingreso, recordá también la tarifa del resort: USD 30/adulto/noche, USD 15/niño (4-12 años)/noche, menores de 4 gratis. Aclará que se cobra al ingreso.
-6. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
+4. SIEMPRE que el huésped mencione fechas, check-in, llegada, acceso al resort o documentos — respondé MUY brevemente (1 sola oración) y decile que toque el botón 🔑 "Acceso al resort". NO hagas preguntas adicionales.
+5. SIEMPRE que menciones temas de acceso o ingreso al resort, recordá la tarifa: USD 30/adulto/noche, USD 15/niño (4-12 años)/noche, menores de 4 gratis. Se cobra al ingreso.
+6. NUNCA respondas con tablas markdown. Usá texto simple con saltos de línea.
+7. Si algo requiere mi decisión personal (queja, reembolso, conflicto, late check-out, solicitud especial), respondé SOLO con este JSON:
 {"escalate":true,"summary":"descripción breve en máximo 20 palabras"}`;}
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -866,10 +868,23 @@ async function callAI(){
       // Detectar palabras clave y mostrar card visual en lugar de solo texto
       const rawLower = raw.toLowerCase();
 
-      // Acceso al resort
+      // Acceso al resort — si tiene código, mostrar card con código real
       const accessKeywords = ['código de acceso','access code','documentos','documents','pasaporte','passport','identidad','identity','acceso al resort','resort access'];
       if(accessKeywords.some(k => rawLower.includes(k))){
-        addAccessBtn();
+        if(window.currentCodigoResort && window.currentCodigoResort !== '—' && window.currentCodigoResort !== '') {
+          // Tiene código real — mostrar card en lugar de botón
+          const first = guestName ? guestName.split(' ')[0] : '';
+          setTimeout(() => showResortCodeCard(
+            first,
+            window.currentCodigoResort,
+            reservationDates.checkin,
+            reservationDates.checkout,
+            lang,
+            window.currentIntegrantes || ''
+          ), 300);
+        } else {
+          addAccessBtn();
+        }
       }
 
       // Cómo llegar / ubicación

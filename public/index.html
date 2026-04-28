@@ -1475,14 +1475,18 @@ function showCheckinCard() {
       d2.style.border = '1px solid #ffc107';
       d2.innerHTML = lang==='es'
         ? `<div style="font-size:13px;color:#856404;">
-             🔒 <strong>Acceso restringido</strong><br><br>
-             El código del portallaves y las fotos de acceso están disponibles solo para huéspedes con reserva verificada.<br><br>
-             Para acceder, volvé al inicio e ingresá tu <strong>código de confirmación de Airbnb</strong>.
+             🔒 <strong>Acceso pendiente</strong><br><br>
+             Para recibir el código de acceso al resort, el WiFi y los detalles de ingreso a la villa, necesitamos que envíes los documentos de identidad de todos los integrantes del grupo.<br><br>
+             <button onclick="startIDFlow()" style="margin-top:8px;width:100%;background:#856404;color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+               🛂 Enviar documentos de identidad
+             </button>
            </div>`
         : `<div style="font-size:13px;color:#856404;">
-             🔒 <strong>Restricted access</strong><br><br>
-             The lockbox code and access photos are only available to guests with a verified reservation.<br><br>
-             To access, go back and enter your <strong>Airbnb confirmation code</strong>.
+             🔒 <strong>Access pending</strong><br><br>
+             To receive your resort access code, WiFi details and villa access information, we need the ID documents of all guests in your group.<br><br>
+             <button onclick="startIDFlow()" style="margin-top:8px;width:100%;background:#856404;color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+               🛂 Send ID documents
+             </button>
            </div>`;
       c.appendChild(d2);
     }
@@ -1501,8 +1505,8 @@ function handleWifiRequest() {
     addUser(lang==='es'?'¿Cuál es el WiFi?':'What is the WiFi?');
     hist.push({role:'user', content:'Asked for WiFi.'});
     addBot(lang==='es'
-      ? '🔒 Los datos del WiFi están disponibles una vez que tengas tu código de acceso al resort. Tocá el botón 🔑 <strong>Acceso al resort</strong> para continuar.'
-      : '🔒 WiFi details are available once you have your resort access code. Tap the 🔑 <strong>Resort access</strong> button to continue.');
+      ? '🔒 Los datos del WiFi estarán disponibles una vez que Pilar genere tu código de acceso. Para eso primero necesitamos tus documentos — tocá 🔑 <strong>Acceso al resort</strong>.'
+      : '🔒 WiFi details will be available once Pilar generates your access code. For that we first need your documents — tap 🔑 <strong>Resort access</strong>.');
   }
 }
 

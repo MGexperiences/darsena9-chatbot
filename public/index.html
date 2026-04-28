@@ -332,7 +332,7 @@ function setLang(l){
   const qa = document.getElementById('qa-bar');
   qa.innerHTML = l==='es'
     ? `<button class="qbtn" onclick="startIDFlow()">🔑 Acceso al resort</button>
-       <button class="qbtn" onclick="askMsg('¿Cuál es el WiFi y la contraseña?')">📶 WiFi</button>
+       <button class="qbtn" onclick="handleWifiRequest()">📶 WiFi</button>
        <button class="qbtn" onclick="showGolfForm()">🛺 Carrito de golf</button>
        <button class="qbtn" onclick="askMsg('¿Cuáles son los horarios de check-in y check-out?')">🕐 Horarios</button>
        <button class="qbtn" onclick="askMsg('¿El BBQ funciona y cómo se usa?')">🔥 BBQ</button>
@@ -343,7 +343,7 @@ function setLang(l){
        <button class="qbtn" onclick="showCheckinCard()">🏠 Cómo llegar</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Otras consultas</button>`
     : `<button class="qbtn" onclick="startIDFlow()">🔑 Resort access</button>
-       <button class="qbtn" onclick="askMsg('What is the WiFi name and password?')">📶 WiFi</button>
+       <button class="qbtn" onclick="handleWifiRequest()">📶 WiFi</button>
        <button class="qbtn" onclick="showGolfForm()">🛺 Golf cart</button>
        <button class="qbtn" onclick="askMsg('What are the check-in and check-out times?')">🕐 Hours</button>
        <button class="qbtn" onclick="askMsg('Does the BBQ work and how do I use it?')">🔥 BBQ</button>
@@ -795,11 +795,7 @@ PROPIEDAD — DÁRSENA 9:
 - Dorm 2: 2 camas queen, baño privado
 - Dorm 3: cama doble, baño privado
 - Check-in: 3:00 PM | Check-out: 11:00 AM (estricto si hay reservas consecutivas)
-- WiFi: Conectarse a TODAS las redes para tener cobertura en toda la casa. Contraseña de las tres: lacautiva
-  · Darsena 9 → lacautiva
-  · Darsena 9-2 → lacautiva
-  · Darsena 9-3 → lacautiva
-  Cuando respondas sobre WiFi, NO uses formato de tabla markdown. Escribilo así: "Darsena 9, Darsena 9-2 y Darsena 9-3 — contraseña: lacautiva (conectate a las tres para mejor cobertura)".
+- WiFi: Hay 3 redes disponibles (Darsena 9, Darsena 9-2, Darsena 9-3) para cobertura en toda la casa. IMPORTANTE: NUNCA des la contraseña del WiFi en texto. Si el huésped pregunta por el WiFi, respondé ÚNICAMENTE: "Los datos del WiFi están disponibles en la sección 📶 WiFi una vez que tengas tu código de acceso al resort." No des la contraseña bajo ninguna circunstancia.
 - Llaves: lockbox a la izquierda de la puerta principal (código disponible solo via app para huéspedes verificados)
 - BBQ: parrilla a gas en terraza — funciona perfecto
 - Limpieza: lun-vie 8-13h incluida. Fines de semana cargo adicional.
@@ -1484,6 +1480,45 @@ function showCheckinCard() {
   }, 400);
 
   hist.push({role:'assistant', content:'Showed check-in card. Verified: ' + verified});
+}
+
+// ── WIFI ─────────────────────────────────────────────────────────
+function handleWifiRequest() {
+  const verified = window.currentCodigoResort && window.currentCodigoResort !== '—' && window.currentCodigoResort !== '';
+  if (verified) {
+    showWifiCard();
+  } else {
+    addUser(lang==='es'?'¿Cuál es el WiFi?':'What is the WiFi?');
+    hist.push({role:'user', content:'Asked for WiFi.'});
+    addBot(lang==='es'
+      ? '🔒 Los datos del WiFi están disponibles una vez que tengas tu código de acceso al resort. Tocá el botón 🔑 <strong>Acceso al resort</strong> para continuar.'
+      : '🔒 WiFi details are available once you have your resort access code. Tap the 🔑 <strong>Resort access</strong> button to continue.');
+  }
+}
+
+function showWifiCard() {
+  addUser(lang==='es'?'¿Cuál es el WiFi y la contraseña?':'What is the WiFi name and password?');
+  hist.push({role:'user', content:'Asked for WiFi.'});
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card gold-border';
+  d.style.maxWidth = '95%';
+  d.innerHTML = lang==='es'
+    ? `<div class="card-title">📶 WiFi</div>
+       <div class="card-sub">Conectate a las 3 redes para tener señal en toda la casa.</div>
+       <div class="card-row"><span>Darsena 9</span><span class="card-val">lacautiva</span></div>
+       <div class="card-row"><span>Darsena 9-2</span><span class="card-val">lacautiva</span></div>
+       <div class="card-row"><span>Darsena 9-3</span><span class="card-val">lacautiva</span></div>
+       <div class="card-note" style="margin-top:8px;">📱 La misma contraseña para las tres redes. Conectate a todas para mejor cobertura en todos los niveles.</div>`
+    : `<div class="card-title">📶 WiFi</div>
+       <div class="card-sub">Connect to all 3 networks for full coverage throughout the house.</div>
+       <div class="card-row"><span>Darsena 9</span><span class="card-val">lacautiva</span></div>
+       <div class="card-row"><span>Darsena 9-2</span><span class="card-val">lacautiva</span></div>
+       <div class="card-row"><span>Darsena 9-3</span><span class="card-val">lacautiva</span></div>
+       <div class="card-note" style="margin-top:8px;">📱 Same password for all three networks. Connect to all for best coverage on every floor.</div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+  hist.push({role:'assistant', content:'Showed WiFi card.'});
 }
 
 // ── SUPERMARKET ───────────────────────────────────────────────────

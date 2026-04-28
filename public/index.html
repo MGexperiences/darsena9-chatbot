@@ -354,13 +354,126 @@ function setLang(l){
        <button class="qbtn" onclick="showCheckinCard()">🏠 How to arrive</button>
        <button class="qbtn" onclick="showOtherForm()">💬 Other questions</button>`;
 
-  // ── Solo consultar Sheet si el usuario eligió idioma explícitamente ─
-  // (no al cargar la página con setLang('en') automático)
+  // ── Mostrar pantalla de código de confirmación ───────────────────
   if (window.langSelected) {
     document.getElementById('welcome-msg').innerHTML = l==='es'
-      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Consultando tu reserva…</span>`
-      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴<br><br><span style="font-size:12px;color:var(--muted)">Checking your reservation…</span>`;
-    fetchSheet(l);
+      ? `¡Bienvenidos al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴`
+      : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴`;
+    setTimeout(() => showCodeInput(l), 300);
+  }
+}
+
+// ── Pantalla de ingreso de código de confirmación ─────────────────
+function showCodeInput(l) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'card navy-border';
+  d.id = 'code-input-card';
+  d.style.maxWidth = '95%';
+  d.innerHTML = l==='es'
+    ? `<div class="card-title">🔐 Código de confirmación</div>
+       <div class="card-sub">Ingresá tu código de confirmación de Airbnb para acceder a tu reserva. Lo encontrás en el email de confirmación o en la app de Airbnb.</div>
+       <div class="form-field" style="margin-bottom:12px;">
+         <label style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;">Código (ej: HMFB2NCFTR)</label>
+         <input type="text" id="confirmation-code-input" class="form-input" 
+                placeholder="Ingresá tu código..." 
+                style="text-transform:uppercase;letter-spacing:2px;font-size:16px;font-weight:500;"
+                oninput="this.value=this.value.toUpperCase()"
+                onkeydown="if(event.key==='Enter')submitConfirmationCode()">
+       </div>
+       <button onclick="submitConfirmationCode()" class="submit-btn">Buscar reserva →</button>
+       <button onclick="showNewGuestWelcome(lang)" 
+               style="margin-top:8px;width:100%;background:transparent;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:6px;">
+         No tengo código — continuar sin reserva
+       </button>`
+    : `<div class="card-title">🔐 Confirmation code</div>
+       <div class="card-sub">Enter your Airbnb confirmation code to access your reservation. You can find it in your confirmation email or in the Airbnb app.</div>
+       <div class="form-field" style="margin-bottom:12px;">
+         <label style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;">Code (e.g. HMFB2NCFTR)</label>
+         <input type="text" id="confirmation-code-input" class="form-input"
+                placeholder="Enter your code..."
+                style="text-transform:uppercase;letter-spacing:2px;font-size:16px;font-weight:500;"
+                oninput="this.value=this.value.toUpperCase()"
+                onkeydown="if(event.key==='Enter')submitConfirmationCode()">
+       </div>
+       <button onclick="submitConfirmationCode()" class="submit-btn">Find reservation →</button>
+       <button onclick="showNewGuestWelcome(lang)"
+               style="margin-top:8px;width:100%;background:transparent;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:6px;">
+         I don't have a code — continue without reservation
+       </button>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+
+  // Focus en el input
+  setTimeout(() => {
+    const input = document.getElementById('confirmation-code-input');
+    if (input) input.focus();
+  }, 100);
+}
+
+// ── Buscar reserva por código ─────────────────────────────────────
+async function submitConfirmationCode() {
+  const input = document.getElementById('confirmation-code-input');
+  const code  = (input?.value || '').trim().toUpperCase();
+  if (!code) { alert(lang==='es'?'Ingresá tu código de confirmación.':'Please enter your confirmation code.'); return; }
+
+  // Deshabilitar botón mientras busca
+  const btn = document.querySelector('#code-input-card .submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = lang==='es'?'Buscando…':'Searching…'; }
+
+  try {
+    const r = await fetch('/api/drive-upload', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ type: 'getReservationByCode', code: code }),
+      redirect: 'follow'
+    });
+    const data = await r.json();
+
+    // Remover card de código
+    document.getElementById('code-input-card')?.remove();
+
+    if (data.success && data.found) {
+      // Reserva encontrada
+      guestName        = data.guestName || '';
+      reservationDates = { checkin: data.checkin, checkout: data.checkout };
+      window.currentCodigoResort = data.codigoResort || '';
+      window.currentIntegrantes  = data.integrantes  || '';
+      saveGuestToLS();
+
+      const first    = guestName.split(' ')[0];
+      const hasDocs  = data.integrantes  && data.integrantes  !== '—' && data.integrantes  !== '';
+      const hasCode  = data.codigoResort && data.codigoResort !== '—' && data.codigoResort !== '';
+      const cancelada = data.estado === 'Cancelada';
+
+      hist.push({role:'assistant', content:`Guest found by code ${code}: ${guestName}. Estado: ${data.estado}`});
+
+      if (cancelada) {
+        addBot(lang==='es'
+          ? `Lo siento, la reserva con código <strong>${code}</strong> fue cancelada. Si creés que hay un error, contactá a Pilar por Airbnb.`
+          : `Sorry, the reservation with code <strong>${code}</strong> was cancelled. If you think this is an error, contact Pilar via Airbnb.`);
+        addWACard('', `<strong>${lang==='es'?'Contactar a Pilar':'Contact Pilar'}</strong>`);
+      } else if (hasCode) {
+        showResortCodeCard(first, data.codigoResort, data.checkin, data.checkout, lang, data.integrantes);
+      } else if (hasDocs) {
+        showDocsSentCard(first, lang);
+      } else {
+        showAccessPromptCard(first, lang);
+      }
+
+    } else {
+      // No encontrado
+      addBot(lang==='es'
+        ? `No encontré ninguna reserva con el código <strong>${code}</strong>. Verificá que el código sea correcto — lo encontrás en el email de Airbnb o en la app.`
+        : `I couldn't find a reservation with code <strong>${code}</strong>. Please check the code — you can find it in your Airbnb email or app.`);
+      // Mostrar el input de nuevo para reintentar
+      setTimeout(() => showCodeInput(lang), 500);
+    }
+
+  } catch(err) {
+    console.error('Code lookup error:', err);
+    document.getElementById('code-input-card')?.remove();
+    showNewGuestWelcome(lang);
   }
 }
 

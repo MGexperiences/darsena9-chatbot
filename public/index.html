@@ -1393,12 +1393,9 @@ function showCheckinCard() {
   d.className = 'card gold-border';
   d.style.maxWidth = '95%';
 
-  const instrES = `<div class="card-title">🏠 Cómo llegar y acceder</div>
+  const instrES = `<div class="card-title">🏠 Cómo llegar</div>
      <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
-     <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
-       📍 Ver ubicación en Google Maps
-     </a>
-     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Instrucciones de acceso</div>
+     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 8px;">📋 Instrucciones de acceso</div>
      <div style="font-size:13px;color:var(--text);line-height:1.7;">
        1. Al llegar a la entrada de <strong>Casa de Campo</strong>, decí que vas al <strong>Townhouse Marina · Dársena 9</strong> en <strong>La Marina</strong><br><br>
        2. En la garita te van a pedir el código de acceso al resort — usá el código que aparece en esta app (sección 🔑 Acceso al resort)<br><br>
@@ -1408,10 +1405,7 @@ function showCheckinCard() {
 
   const instrEN = `<div class="card-title">🏠 How to get there</div>
      <div class="card-sub">Townhouse Marina · Dársena 9 — La Marina, Casa de Campo</div>
-     <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:14px;">
-       📍 Open in Google Maps
-     </a>
-     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Access instructions</div>
+     <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 8px;">📋 Access instructions</div>
      <div style="font-size:13px;color:var(--text);line-height:1.7;">
        1. When you arrive at the <strong>Casa de Campo</strong> entrance, tell them you're going to <strong>Townhouse Marina · Dársena 9</strong> at <strong>La Marina</strong><br><br>
        2. At the gate they'll ask for your resort access code — use the code shown in this app (🔑 Resort access section)<br><br>
@@ -1432,6 +1426,9 @@ function showCheckinCard() {
       d2.style.maxWidth = '95%';
       d2.innerHTML = lang==='es'
         ? `<div class="card-title">🔑 Acceso a la villa</div>
+           <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:12px;">
+             📍 Ver ubicación en Google Maps
+           </a>
            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
              <div>
                <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Portallaves</div>
@@ -1446,6 +1443,9 @@ function showCheckinCard() {
            </div>
            <div class="card-note">🔢 Código del portallaves: <strong>0926</strong> · Check-in a partir de las <strong>3:00 PM</strong></div>`
         : `<div class="card-title">🔑 Villa access</div>
+           <a href="https://maps.app.goo.gl/8dtb12Dy5iLrRqqT7" target="_blank" class="map-btn" style="margin-bottom:12px;">
+             📍 Open in Google Maps
+           </a>
            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
              <div>
                <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Lockbox</div>

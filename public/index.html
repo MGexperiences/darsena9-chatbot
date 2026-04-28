@@ -446,6 +446,15 @@ async function submitConfirmationCode() {
       const hasCode  = data.codigoResort && data.codigoResort !== '—' && data.codigoResort !== '';
       const cancelada = data.estado === 'Cancelada';
 
+      // Actualizar welcome msg y saludar por nombre
+      document.getElementById('welcome-msg').innerHTML = lang==='es'
+        ? `¡Bienvenido/a al <strong>Townhouse Marina · Dársena 9</strong> en Casa de Campo 🌴`
+        : `Welcome to <strong>Townhouse Marina · Dársena 9</strong> at Casa de Campo 🌴`;
+
+      addBot(lang==='es'
+        ? `¡Hola <strong>${first}</strong>! 👋 Encontré tu reserva del <strong>${data.checkin}</strong> al <strong>${data.checkout}</strong>. Soy el asistente de Pilar, ¡bienvenido/a a Casa de Campo! 🌴`
+        : `Hi <strong>${first}</strong>! 👋 I found your reservation from <strong>${data.checkin}</strong> to <strong>${data.checkout}</strong>. I'm Pilar's assistant, welcome to Casa de Campo! 🌴`);
+
       hist.push({role:'assistant', content:`Guest found by code ${code}: ${guestName}. Estado: ${data.estado}`});
 
       if (cancelada) {

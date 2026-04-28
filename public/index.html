@@ -863,9 +863,31 @@ async function callAI(){
     } else {
       addBot(raw);
       hist.push({role:'assistant', content:raw});
-      const accessKeywords = ['código de acceso','code','documentos','documents','pasaporte','passport','identidad','identity','acceso al resort','resort access'];
-      if(accessKeywords.some(k => raw.toLowerCase().includes(k))){
+      // Detectar palabras clave y mostrar card visual en lugar de solo texto
+      const rawLower = raw.toLowerCase();
+
+      // Acceso al resort
+      const accessKeywords = ['código de acceso','access code','documentos','documents','pasaporte','passport','identidad','identity','acceso al resort','resort access'];
+      if(accessKeywords.some(k => rawLower.includes(k))){
         addAccessBtn();
+      }
+
+      // Cómo llegar / ubicación
+      const locationKeywords = ['cómo llegar','como llegar','dársena 9','darsena 9','la marina','maps','google maps','how to get','directions','ubicación','ubicacion','location','lockbox','portallaves','puerta principal','main door'];
+      if(locationKeywords.some(k => rawLower.includes(k))){
+        setTimeout(() => showCheckinCard(), 300);
+      }
+
+      // Supermercado
+      const superKeywords = ['supermercado','supermarket','nacional','butcher shop'];
+      if(superKeywords.some(k => rawLower.includes(k))){
+        setTimeout(() => showSupermarket(), 300);
+      }
+
+      // Carrito de golf
+      const golfKeywords = ['carrito de golf','golf cart','70/día','100/día','70/day','100/day'];
+      if(golfKeywords.some(k => rawLower.includes(k))){
+        setTimeout(() => showGolfForm(), 300);
       }
     }
   } catch(e){

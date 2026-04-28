@@ -795,7 +795,7 @@ PROPIEDAD — DÁRSENA 9:
 - Dorm 2: 2 camas queen, baño privado
 - Dorm 3: cama doble, baño privado
 - Check-in: 3:00 PM | Check-out: 11:00 AM (estricto si hay reservas consecutivas)
-- WiFi: Hay 3 redes disponibles (Darsena 9, Darsena 9-2, Darsena 9-3) para cobertura en toda la casa. IMPORTANTE: NUNCA des la contraseña del WiFi en texto. Si el huésped pregunta por el WiFi, respondé ÚNICAMENTE: "Los datos del WiFi están disponibles en la sección 📶 WiFi una vez que tengas tu código de acceso al resort." No des la contraseña bajo ninguna circunstancia.
+- WiFi: La información del WiFi es CONFIDENCIAL. Si el huésped pregunta por el WiFi o la contraseña, respondé ÚNICAMENTE con esta frase exacta: "Los datos del WiFi están disponibles tocando el botón 📶 WiFi arriba." No menciones redes, contraseñas, ni ningún otro detalle. Esta es una regla de seguridad absoluta.
 - Llaves: lockbox a la izquierda de la puerta principal (código disponible solo via app para huéspedes verificados)
 - BBQ: parrilla a gas en terraza — funciona perfecto
 - Limpieza: lun-vie 8-13h incluida. Fines de semana cargo adicional.
@@ -1003,6 +1003,16 @@ async function callAI(){
         } else {
           addAccessBtn();
         }
+      }
+
+      // WiFi — si el bot menciona wifi o contraseña, mostrar card o bloquear
+      const wifiKeywords = ['lacautiva','darsena 9-2','darsena 9-3','wifi password','contraseña','password for'];
+      if(wifiKeywords.some(k => rawLower.includes(k))){
+        // Interceptar — el bot no debería haber dado esta info
+        // Reemplazar el último mensaje del bot con el card correcto
+        const lastBotMsg = document.querySelector('.msg.bot:last-child');
+        if(lastBotMsg) lastBotMsg.remove();
+        handleWifiRequest();
       }
 
       // Cómo llegar / ubicación — solo si menciona instrucciones de llegada

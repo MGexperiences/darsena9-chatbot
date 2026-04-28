@@ -547,8 +547,7 @@ async function submitExtraGuests() {
   if (incomplete) { alert(lang==='es'?'Completá nombre y documento para cada persona.':'Please complete name and document for each person.'); return; }
 
   document.querySelectorAll('.add-guests-card').forEach(el => el.remove());
-  const listTxt = guests.join('
-');
+  const listTxt = guests.join('\n');
   addUser(lang==='es'?`Integrantes adicionales:
 ${listTxt}`:`Additional guests:
 ${listTxt}`);
@@ -556,7 +555,7 @@ ${listTxt}`);
 
   addBot(lang==='es'
     ?'¡Gracias! Le aviso a Pilar para actualizar el acceso al resort con los nuevos integrantes 🙏'
-    :'Thank you! I'll notify Pilar to update the resort access with the new guests 🙏');
+    :'Thank you! I will notify Pilar to update the resort access with the new guests 🙏');
 
   try {
     await fetch('/api/drive-upload', {

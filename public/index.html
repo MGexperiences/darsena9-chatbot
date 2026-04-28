@@ -384,6 +384,8 @@ async function fetchSheet(l) {
 
     guestName        = name;
     reservationDates = { checkin: checkin, checkout: checkout };
+    // Guardar código de resort globalmente para usar en startIDFlow
+    window.currentCodigoResort = codigoResort;
     // Actualizar localStorage con datos del Sheet (fuente de verdad)
     saveGuestToLS();
 
@@ -889,12 +891,47 @@ function startIDFlow(){
   hist.push({role:'user', content:'Needs resort access code.'});
   uploadedPhotos=[]; guestCount=1;
 
+  // Si ya tiene código de resort, mostrarlo y preguntar si quiere agregar más
+  if(window.currentCodigoResort && window.currentCodigoResort !== '—' && window.currentCodigoResort !== '') {
+    setTimeout(() => {
+      const first = guestName ? guestName.split(' ')[0] : '';
+      const c = document.getElementById('chat');
+      const d = document.createElement('div');
+      d.className = 'card gold-border';
+      d.style.maxWidth = '95%';
+      d.innerHTML = lang==='es'
+        ? `<div class="card-title">🏖 Tu código de acceso</div>
+           <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:10px 0;">
+             <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">CÓDIGO DE ACCESO</div>
+             <div style="font-size:28px;font-weight:600;color:var(--goldl);letter-spacing:4px;">${window.currentCodigoResort}</div>
+           </div>
+           <div class="card-sub" style="margin-top:8px;">¿Querés registrar más integrantes para el acceso?</div>
+           <div style="display:flex;gap:8px;margin-top:10px;">
+             <button onclick="showAddGuestsForm();this.closest('.card').remove()" style="flex:1;background:var(--navy);color:var(--goldl);border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">✅ Sí, agregar más</button>
+             <button onclick="this.closest('.card').remove()" style="flex:1;background:var(--sand);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;">No, gracias</button>
+           </div>`
+        : `<div class="card-title">🏖 Your access code</div>
+           <div style="background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin:10px 0;">
+             <div style="font-size:11px;color:var(--goldl);opacity:.7;letter-spacing:1px;margin-bottom:4px;">ACCESS CODE</div>
+             <div style="font-size:28px;font-weight:600;color:var(--goldl);letter-spacing:4px;">${window.currentCodigoResort}</div>
+           </div>
+           <div class="card-sub" style="margin-top:8px;">Would you like to register more guests for access?</div>
+           <div style="display:flex;gap:8px;margin-top:10px;">
+             <button onclick="showAddGuestsForm();this.closest('.card').remove()" style="flex:1;background:var(--navy);color:var(--goldl);border:none;border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">✅ Yes, add more</button>
+             <button onclick="this.closest('.card').remove()" style="flex:1;background:var(--sand);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;">No, thanks</button>
+           </div>`;
+      c.appendChild(d);
+      c.scrollTop = c.scrollHeight;
+    }, 400);
+    return;
+  }
+
   if(guestName && reservationDates.checkin && reservationDates.checkout){
-    // Nombre y fechas conocidos (localStorage o iCal con nombre)
+    // Nombre y fechas conocidos (localStorage o Sheet)
     setTimeout(()=>{
       addBot(lang==='es'
-        ?`¡Perfecto ${guestName.split(' ')[0]}! Ya tengo tus datos (${fmt(reservationDates.checkin)} al ${fmt(reservationDates.checkout)}). Solo necesito los documentos de identidad:`
-        :`Perfect ${guestName.split(' ')[0]}! I already have your details (${fmt(reservationDates.checkin)} to ${fmt(reservationDates.checkout)}). I just need the ID documents:`);
+        ?`¡Perfecto ${guestName.split(' ')[0]}! Ya tengo tus datos (${reservationDates.checkin} al ${reservationDates.checkout}). Solo necesito los documentos de identidad:`
+        :`Perfect ${guestName.split(' ')[0]}! I already have your details (${reservationDates.checkin} to ${reservationDates.checkout}). I just need the ID documents:`);
       setTimeout(showIDCard, 350);
     }, 400);
 
@@ -1186,7 +1223,7 @@ function showCheckinCard() {
        <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Instrucciones de acceso</div>
        <div style="font-size:13px;color:var(--text);line-height:1.7;">
          1. Al llegar a la entrada de <strong>Casa de Campo</strong>, decí que vas al <strong>Townhouse Marina · Dársena 9</strong> en <strong>La Marina</strong><br><br>
-         2. En la garita te van a pedir el código de acceso al resort — usá el código que Pilar te envió por Airbnb<br><br>
+         2. En la garita te van a pedir el código de acceso al resort — usá el código que aparece en esta app (sección 🔑 Acceso al resort)<br><br>
          3. Una vez dentro, seguí las indicaciones hacia <strong>La Marina / Dársena 9</strong><br><br>
          4. Al llegar a la propiedad, el portallaves está a la <strong>izquierda de la puerta principal</strong>
        </div>
@@ -1218,7 +1255,7 @@ function showCheckinCard() {
        <div style="font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;">📋 Access instructions</div>
        <div style="font-size:13px;color:var(--text);line-height:1.7;">
          1. When you arrive at the <strong>Casa de Campo</strong> entrance, tell them you're going to <strong>Townhouse Marina · Dársena 9</strong> at <strong>La Marina</strong><br><br>
-         2. At the gate they'll ask for your resort access code — use the code Pilar sent you via Airbnb<br><br>
+         2. At the gate they'll ask for your resort access code — use the code shown in this app (🔑 Resort access section)<br><br>
          3. Once inside, follow the signs toward <strong>La Marina / Dársena 9</strong><br><br>
          4. When you arrive at the property, the lockbox is to the <strong>left of the main door</strong>
        </div>

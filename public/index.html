@@ -382,10 +382,7 @@ function showCodeInput(l) {
                 onkeydown="if(event.key==='Enter')submitConfirmationCode()">
        </div>
        <button onclick="submitConfirmationCode()" class="submit-btn">Buscar reserva →</button>
-       <button onclick="showNewGuestWelcome(lang)" 
-               style="margin-top:8px;width:100%;background:transparent;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:6px;">
-         No tengo código — continuar sin reserva
-       </button>`
+`
     : `<div class="card-title">🔐 Confirmation code</div>
        <div class="card-sub">Enter your Airbnb confirmation code to access your reservation. You can find it in your confirmation email or in the Airbnb app.</div>
        <div class="form-field" style="margin-bottom:12px;">
@@ -397,10 +394,7 @@ function showCodeInput(l) {
                 onkeydown="if(event.key==='Enter')submitConfirmationCode()">
        </div>
        <button onclick="submitConfirmationCode()" class="submit-btn">Find reservation →</button>
-       <button onclick="showNewGuestWelcome(lang)"
-               style="margin-top:8px;width:100%;background:transparent;border:none;color:var(--muted);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:6px;">
-         I don't have a code — continue without reservation
-       </button>`;
+`;
   c.appendChild(d);
   c.scrollTop = c.scrollHeight;
 
@@ -1391,7 +1385,7 @@ function showCheckinCard() {
   addUser(lang==='es'?'¿Cómo llego a la propiedad?':'How do I get to the property?');
   hist.push({role:'user', content:'Asked for check-in / arrival instructions.'});
 
-  const verified = guestName && guestName !== '' && reservationDates.checkin;
+  const verified = window.currentCodigoResort && window.currentCodigoResort !== '—' && window.currentCodigoResort !== '';
   const c = document.getElementById('chat');
 
   // Card de mapa y instrucciones generales — siempre visible

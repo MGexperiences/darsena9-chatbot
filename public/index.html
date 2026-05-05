@@ -686,11 +686,19 @@ async function submitExtraGuests() {
   if (incomplete) { alert(lang==='es'?'Completá nombre y documento para cada persona.':'Please complete name and document for each person.'); return; }
 
   document.querySelectorAll('.add-guests-card').forEach(el => el.remove());
-  const listTxt = guests.join('\n');
-  addUser(lang==='es'?`Integrantes adicionales:
-${listTxt}`:`Additional guests:
-${listTxt}`);
-  hist.push({role:'user', content:`Additional guests: ${listTxt}`});
+
+  // Combinar integrantes existentes + nuevos en lista completa
+  const existing = (window.currentIntegrantes && window.currentIntegrantes !== '—')
+    ? window.currentIntegrantes.trim() : '';
+  const newOnes  = guests.join('\n');
+  const allLines = [];
+  if (existing) existing.split('\n').forEach(l => { if (l.trim()) allLines.push(l.replace(/^\d+\.\s*/, '').trim()); });
+  guests.forEach(g => { if (g.trim()) allLines.push(g.replace(/^\d+\.\s*/, '').trim()); });
+  const fullList = allLines.map((l, i) => (i+1) + '. ' + l).join('\n');
+  window.currentIntegrantes = fullList;
+
+  addUser(lang==='es'?`Integrantes adicionales:\n${newOnes}`:`Additional guests:\n${newOnes}`);
+  hist.push({role:'user', content:`Additional guests: ${newOnes}`});
 
   addBot(lang==='es'
     ?'¡Gracias! Le aviso a Pilar para actualizar el acceso al resort con los nuevos integrantes 🙏'
@@ -703,9 +711,9 @@ ${listTxt}`);
       body: JSON.stringify({
         type: 'guests',
         guestName: guestName || 'Guest',
-        guests: listTxt,
-        checkin: fmt(reservationDates.checkin) || reservationDates.checkin,
-        checkout: fmt(reservationDates.checkout) || reservationDates.checkout,
+        guests: fullList,
+        checkin: reservationDates.checkin,
+        checkout: reservationDates.checkout,
         checkinRaw: reservationDates.checkin,
         checkoutRaw: reservationDates.checkout,
         photos: [],
@@ -714,7 +722,7 @@ ${listTxt}`);
     });
   } catch(e) { console.error('Extra guests error:', e); }
 
-  hist.push({role:'assistant', content:`Additional guests sent to Pilar: ${listTxt}`});
+  hist.push({role:'assistant', content:`Full guest list sent: ${fullList}`});
 }
 
 // ── Banner cuando encontramos fechas pero no nombre ───────────────
